@@ -1,7 +1,7 @@
 # Unscripted
 
 * Description: An open online universe for unscripted bots
-* Primary Objective: encourage creation of artificial general intelligent agents
+* Primary Objective: encourage creation of artificial general intelligent agents (0 prior knowledge about world, no training data, general purpose, 100% algorithmically controlled)
 * Version: Currently only a statement of intent
 * Status: Quick experimental prototype
 
