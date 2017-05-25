@@ -14,5 +14,6 @@ Potentially interesting aspects:
 * emergent agent-agent communication
 * virtual-world history
 * study of agent-human interactions
+* video game NPCs that are not dumb or predictable 
 
 More details later.
