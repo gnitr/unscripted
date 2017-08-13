@@ -10,7 +10,7 @@
 
 My pseudo is Goffer Looney, I have some background in software engineering, a bit in AI and film studies. If anything here inspires you or tickle your interest please feel free to contact me via github. Unfortunately I can only work on this in my spare time. I've had this idea for more than 15 years but never had a chance to do anything practical about it!
 
-If you borrow anything from here, please be nice and give credit or link back to it. The goal is to promote this particular approach and I'm interested to learn what other similar initiatives looks like.
+If you borrow anything from here, please be nice and give credit or link back to it. The goal is to promote this particular approach and I'm interested to learn what other similar initiatives look like.
 
 ## Why?
 Have you ever watched a film, read a book, played an adventure or RPG game and got really immersed into that world but left wanting for more? You enjoyed the quests, the backstories, the characters, the turn of events, ... but you often noticed that it is all scripted. It is a limited construct authored by humans. They let you glimpse at their fabricated world. You only see and experience the narrative paths designed for you. You have limited choices among pre-written dialogues, cut-off scenes. 
