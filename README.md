@@ -33,19 +33,19 @@ The idea is to build a proof of concept, a basic prototype to see how things wor
 Yeah, despite all the amazing progresses in narrow AI in recent years we are very far away from artificial general intelligence. Common sense, ability to learn from few examples, real emotions, ability to model things in your mind before trying them, multi-skilled agents, knowledge transfer, human-like communication abilities, ... none of that is feasible at the moment. 
 
 So what about this idea of having human-like intelligent bots? Well, let's start with the end and assume this will be possible one day. We then introduce a few key elements to help things happening:
-* we provide *a virtual world*: it is a sandbox where anything can happen. Safe for humans and our reality. It will help the bots evolve freely without caring about morally negative consequences within our reality. This offers a standard platform for people to create their own bots;
-* *open platform*: bots will be implemented externally by independent teams; as part of this project we only provide example bots but very dumb. Real experts are welcome to step in and create their own intelligent agent on their own machines. They will interract with our world via a web API;
-* *zero prior knowledge*: you could achieve an illustion of smart behaviour using traditional procedural techniques. But what's the point of having yet another scripted agent that reacts to known world events and communication keywords with mostly predefined actions? So we introduce this crucial rule of having no (or almost none) prior knowledge about the virtual world. They have to learn as much as possible via experience, tradition and observation. If possible the world logic will try to penalise bots that use knowledge embedded by humans. We may also want to apply the same drastic rules to cognitive process: it should be, as much as possible, emergent rather than scripted;
-* *evolutionary life*: the bots will be born into the world and may have a long life. We don't expect them to hit the ground running. Moreover they can reproduce, so intelligence can happen via long-term and large quantity of experiences and inter-generational activities. Intelligence can obviously also evolve through regular improvement of the bot algorithms; but that's not the only way. The world will promote survival of the fittest via life-challenging events and competition for resources. Health/survival and a simple model of pain and pleasure will be embedded in the world logic. That should give bots inner drive, practical aims and possibly more subtle psychological processes.
+* we provide **a virtual world**: it is a sandbox where anything can happen. Safe for humans and our reality. It will help the bots evolve freely without caring about morally negative consequences within our reality. This offers a standard platform for people to create their own bots;
+* **open platform**: bots will be implemented externally by independent teams; as part of this project we only provide example bots but very dumb. Real experts are welcome to step in and create their own intelligent agent on their own machines. They will interract with our world via a web API;
+* **zero prior knowledge**: you could achieve an illustion of smart behaviour using traditional procedural techniques. But what's the point of having yet another scripted agent that reacts to known world events and communication keywords with mostly predefined actions? So we introduce this crucial rule of having no (or almost none) prior knowledge about the virtual world. They have to learn as much as possible via experience, tradition and observation. If possible the world logic will try to penalise bots that use knowledge embedded by humans. We may also want to apply the same drastic rules to cognitive process: it should be, as much as possible, emergent rather than scripted;
+* **evolutionary life**: the bots will be born into the world and may have a long life. We don't expect them to hit the ground running. Moreover they can reproduce, so intelligence can happen via long-term and large quantity of experiences and inter-generational activities. Intelligence can obviously also evolve through regular improvement of the bot algorithms; but that's not the only way. The world will promote survival of the fittest via life-challenging events and competition for resources. Health/survival and a simple model of pain and pleasure will be embedded in the world logic. That should give bots inner drive, practical aims and possibly more subtle psychological processes.
 
 # Architecture
 
 Components:
-* *World logic*: a simulated time-space continuum filled with objects with physical laws, interraction rules and mechanism, turn based system for bot actions, ...
-* *Non-living object* logic (extensible): e.g.  tree, a chair, and how they interract with bots and other objects
-* *Living objects*: i.e. bots
-* *Web API* for the bots to communicate with the world and its objects
-* *Visualisation* (e.g. a 2D map of the world in a web page), via Web API
+* **World logic**: a simulated time-space continuum filled with objects with physical laws, interraction rules and mechanism, turn based system for bot actions, ...
+* **Non-living object** logic (extensible): e.g.  tree, a chair, and how they interract with bots and other objects
+* **Living objects**: i.e. bots
+* **Web API** for the bots to communicate with the world and its objects
+* **Visualisation** (e.g. a 2D map of the world in a web page), via Web API
 
 # Road map
 
