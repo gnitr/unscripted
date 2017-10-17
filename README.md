@@ -3,6 +3,7 @@
 * Description: An open online universe for unscripted bots
 * Primary Objective: encourage creation of artificial general intelligent agents (0 prior knowledge about world, no training data, general purpose, 100% algorithmically controlled)
 * Secondary: Let's see what happens when we let bots live their own life, reproduce, survive, thrive and create their own stories.
+* Focus: liviness and individual behaviour rather than high level intelligence and optimal actions, life-long and generational evolutions rather than one-shot bots, human-like situations and conditions, psychological, social and behavioural emphasis rather than low-level sensory input processing
 * Version: Currently only a statement of intent
 * Next stage: Quick experimental prototype (see roadmap below)
 
@@ -35,7 +36,7 @@ Yeah, despite all the amazing progresses in narrow AI in recent years we are ver
 So what about this idea of having human-like intelligent bots? Well, let's start with the end and assume this will be possible one day. We then introduce a few key elements to help things happening:
 * we provide **a virtual world**: it is a sandbox where anything can happen. Safe for humans and our reality. It will help the bots evolve freely without caring about morally negative consequences within our reality. This offers a standard platform for people to create their own bots;
 * **open platform**: bots will be implemented externally by independent teams; as part of this project we only provide example bots but very dumb. Real experts are welcome to step in and create their own intelligent agent on their own machines. They will interract with our world via a web API;
-* **zero prior knowledge**: you could achieve an illustion of smart behaviour using traditional procedural techniques. But what's the point of having yet another scripted agent that reacts to known world events and communication keywords with mostly predefined actions? So we introduce this crucial rule of having no (or almost none) prior knowledge about the virtual world. They have to learn as much as possible via experience, tradition and observation. If possible the world logic will try to penalise bots that use knowledge embedded by humans. We may also want to apply the same drastic rules to cognitive process: it should be, as much as possible, emergent rather than scripted;
+* **zero prior knowledge**: you could create an illusion of smart behaviour by using traditional procedural techniques. But what's the point of having yet another scripted agent that reacts to known world events and communication keywords with mostly predefined actions? So we introduce this crucial rule of having no (or almost no) prior knowledge about the virtual world. They have to learn as much as possible via experience, tradition and observation. If possible the world logic will try to penalise bots that use knowledge embedded by humans. We may also want to apply the same drastic rules to cognitive process: it should be, as much as possible, emergent rather than scripted;
 * **evolutionary life**: the bots will be born into the world and may have a long life. We don't expect them to hit the ground running. Moreover they can reproduce, so intelligence can happen via long-term and large quantity of experiences and inter-generational activities. Intelligence can obviously also evolve through regular improvement of the bot algorithms; but that's not the only way. The world will promote survival of the fittest via life-challenging events and competition for resources. Health/survival and a simple model of pain and pleasure will be embedded in the world logic. That should give bots inner drive, practical aims and possibly more subtle psychological processes.
 
 # Architecture
@@ -60,13 +61,21 @@ Components:
 
 * create a few world objects and implement the way bots can interract with them
 
-## Phase 3: Evolution and survival
+## Phase 3: Needs for resources and survival
 
-* Bots can reproduce and die, they experience pain and pleasure
-* They need resources to stay healthy (e.g. water, shelter, ...)
-* Create a world with limited resources
+* introduce resources that the bots can consume (water, food, shelter, temperature, ...)
+* they experience sensations when they need or misuse resources (hunger, cold, ...)
+* bots can die due to unfulfilled needs 
+* new bots replace dead ones
 
-## Phase 4 and beyond: TBC
+## Phase 4: Reproduction and inheritence
+
+* bots can reproduce
+* bots can inherit from parents
+
+## Phase 5 and beyond: TBC
+* communication
+* ...
 
 # Derived projects
 
