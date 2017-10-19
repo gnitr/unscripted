@@ -5,7 +5,7 @@
 * Secondary: Let's see what happens when we let bots live their own life, reproduce, survive, thrive and create their own stories.
 * Focus: liviness and individual behaviour rather than high level intelligence and optimal actions, life-long and generational evolutions rather than one-shot bots, human-like situations and conditions, psychological, social and behavioural emphasis rather than low-level sensory input processing
 * Version: Currently only a statement of intent
-* Next stage: Quick experimental prototype (see roadmap below)
+* Current stage: Phase 1 is in progress (see 'roadmap' section below)
 
 ## About me
 
