@@ -1,9 +1,13 @@
 # Unscripted
 
-* **Description**: a proof-of-concept of an collaborative online virtual world to experiment with unscripted bots
-* **Primary** Objective: encourage creation of artificial general intelligent agents (0 prior knowledge about world, no training data, general purpose, 100% algorithmically controlled)
+* **Description**: a proof-of-concept of a collaborative online virtual world to experiment with unscripted bots
+* **Primary Objective**: encourage creation of artificial general intelligent agents (0 prior knowledge about world, no training data, general purpose, 100% algorithmically controlled)
 * **Secondary**: Let's see what happens when we let bots live their own life, reproduce, survive, thrive and create their own stories.
-* **Focus**: liviness and individual behaviour rather than high level intelligence and optimal actions, life-long and generational evolutions rather than one-shot bots, human-like situations and conditions, psychological, social and behavioural emphasis rather than low-level sensory input processing, an community framework rather than a proprietary algorithm
+* **Focus**: 
+** unscripted behaviour rather than high level intelligence and optimal solution solving, 
+** life-long and generational evolutions rather than adult-born bots, 
+** human-like situations, psychological, social and behavioural emphasis rather than low-level sensory input processing, 
+** build an open framework rather than a proprietary algorithm
 * **Status**: Development of phase 1 just started (see 'roadmap' section below)
 
 ## About me
@@ -53,7 +57,7 @@ Main components:
 
 # Road map
 
-## Phase 1: Skeleton architecture
+## Phase 1: Skeleton architecture (In progress, started Oct 2017)
 
 * empty world (a 2D square with no non-living objects)
 * Web API
