@@ -9,7 +9,7 @@
 
 ## About me
 
-My pseudo is Goffer Looney, I have some background in software engineering, a bit in AI and film studies. If anything here inspires you or tickle your interest please feel free to contact me via github. Unfortunately I can only work on this in my spare time. I've had this idea for more than 15 years but never had a chance to do anything practical about it! Read more about [my perspectives on AI](https://github.com/goffer-looney/unscripted/wiki/Personal-Vision-&-Beliefs).
+I have some background in software engineering, a bit in AI and film studies. If anything here inspires you or tickle your interest please feel free to contact me via github. Unfortunately I can only work on this in my spare time. I've had this idea for more than 15 years but never had a chance to do anything practical about it! Read more about [my perspectives on AI](https://github.com/goffer-looney/unscripted/wiki/Personal-Vision-&-Beliefs).
 
 If you borrow anything from here, please be nice and give credit or link back to it. The goal is to promote this particular approach and I'm interested to learn what other similar initiatives look like.
 
