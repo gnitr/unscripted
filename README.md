@@ -1,11 +1,10 @@
 # Unscripted
 
-* Description: An open online universe for unscripted bots
-* Primary Objective: encourage creation of artificial general intelligent agents (0 prior knowledge about world, no training data, general purpose, 100% algorithmically controlled)
-* Secondary: Let's see what happens when we let bots live their own life, reproduce, survive, thrive and create their own stories.
-* Focus: liviness and individual behaviour rather than high level intelligence and optimal actions, life-long and generational evolutions rather than one-shot bots, human-like situations and conditions, psychological, social and behavioural emphasis rather than low-level sensory input processing
-* Version: Currently only a statement of intent
-* Current stage: Phase 1 is in progress (see 'roadmap' section below)
+* **Description**: a proof-of-concept of an collaborative online virtual world to experiment with unscripted bots
+* **Primary** Objective: encourage creation of artificial general intelligent agents (0 prior knowledge about world, no training data, general purpose, 100% algorithmically controlled)
+* **Secondary**: Let's see what happens when we let bots live their own life, reproduce, survive, thrive and create their own stories.
+* **Focus**: liviness and individual behaviour rather than high level intelligence and optimal actions, life-long and generational evolutions rather than one-shot bots, human-like situations and conditions, psychological, social and behavioural emphasis rather than low-level sensory input processing, an community framework rather than a proprietary algorithm
+* **Status**: Development of phase 1 just started (see 'roadmap' section below)
 
 ## About me
 
@@ -85,6 +84,8 @@ Main components:
 
 If successfull, the initial project can lead to many interesting research strands, well beyond Computer Science, AI or video games:
 * experiments with unguided AI life evolution
+* a new type of Turing test (comparing humans ands bots ability to solve virtual world challenges)
+* a way for AI researchers to experiment with their own algorithms, and compare their achievements with others
 * a safe sandbox for future real-world intelligences
 * emergence of non-human controlled narratives
 * stimulate philosophical, psychological and ethical questions
