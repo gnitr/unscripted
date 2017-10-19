@@ -41,7 +41,11 @@ So what about this idea of having human-like intelligent bots? Well, let's start
 
 # Architecture
 
-Components:
+The architecture will be open and modular. Contributors will be able to take control remotely and in real-time of the mind of one or more bots by using the web api.
+
+There will be a very crude web visualisation of a world and the bots so anyone can have an overview of the activity. More advanced and fancy visualisations can be contributed later by using the web api.
+
+Main components:
 * **World logic**: a simulated time-space continuum filled with objects with physical laws, interraction rules and mechanism, turn based system for bot actions, ...
 * **Non-living object** logic (extensible): e.g.  tree, a chair, and how they interract with bots and other objects
 * **Living objects**: i.e. bots
