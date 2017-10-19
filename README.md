@@ -4,10 +4,10 @@
 * **Primary Objective**: encourage creation of artificial general intelligent agents (0 prior knowledge about world, no training data, general purpose, 100% algorithmically controlled)
 * **Secondary**: Let's see what happens when we let bots live their own life, reproduce, survive, thrive and create their own stories.
 * **Focus**: 
-** unscripted behaviour rather than high level intelligence and optimal solution solving, 
-** life-long and generational evolutions rather than adult-born bots, 
-** human-like situations, psychological, social and behavioural emphasis rather than low-level sensory input processing, 
-** build an open framework rather than a proprietary algorithm
+  * unscripted behaviour rather than high level intelligence and optimal solution solving, 
+  * life-long and generational evolutions rather than adult-born bots, 
+  * human-like situations, psychological, social and behavioural emphasis rather than low-level sensory input processing, 
+  * build an open framework rather than a proprietary algorithm
 * **Status**: Development of phase 1 just started (see 'roadmap' section below)
 
 ## About me
