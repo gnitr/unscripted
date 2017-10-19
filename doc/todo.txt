@@ -1,0 +1,20 @@
+Phase 1
+
+[done] Django project and apps skeletons
+[done] Dummy models for
+    . Thing
+    . World
+    . Bot
+. Web api framework:
+    . create a world
+    . remove a world
+    . create a bot
+    . move bot
+    . get all world data
+. Crude visualisation
+    [done] web page
+    [] get world data with web api
+    [] very basic visualisation of bots on world map
+. release online
+    . pb with domain config on web hosting side, site still links to godaddy
+    
