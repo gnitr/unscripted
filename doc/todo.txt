@@ -1,6 +1,7 @@
 Phase 1
 
 [done] Django project and apps skeletons
+[] Rewrite models witj MongoDB bue to Thing inheritence and flexible schema
 [done] Dummy models for
     . Thing
     . World
