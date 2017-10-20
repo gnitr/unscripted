@@ -6,15 +6,30 @@ Phase 1
     . World
     . Bot
 . Web api framework:
-    . create a world
-    . remove a world
-    . create a bot
-    . move bot
-    . get all world data
+    . create a world    POST /worlds
+    . list words        GET /worlds
+    . remove a world    DEL /worlds/X
+    . create a bot      POST /worlds/X/things
+    . move bot          POST /worlds/X/things/Y/actions/walk/X?angle=0.3
+    . get all world data    GET /worlds/X/things
 . Crude visualisation
     [done] web page
     [] get world data with web api
     [] very basic visualisation of bots on world map
 . release online
     . pb with domain config on web hosting side, site still links to godaddy
+    
+
+Thing
+    pos
+    dims
+    type
+    parent
+    properties
+        _private
+        public
+    
+class Thing
+    actionX
+    _actionY
     
