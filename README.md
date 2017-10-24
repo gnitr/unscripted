@@ -106,9 +106,9 @@ If successfull, the initial project can lead to many interesting research strand
 
 * **Open AI Gym**: an open and standardising framework maintained by AI experts to let researchers experiment with reinforcement learning algorithms/models and compare the results. There are many things in common with Unscripted.
 
-* **WestWorld**: a movie and a TV series about a theme park populated by ultra-realistic bots. Unscripted is similar in the sense that we provide a world with human-like bots where naratives are important. What's different in Unscripted: bots are not 'coded'; the narratives are not scripted; the artificial world is virtual, much simpler than reality and not-photorealistic; humans may enter the world but their 'body', characteristics and privileges will be identical to bots, only the mind will differ; bots can reproduce.
-
 I have thought about this a long time ago and never had the time or chance to do anything about it so I decided to give it a shot anyway, even if it fails or may look very naive compared to other projects like Open AI Gym. The Unscripted framework has more baggage (which is a disadvantage) because it's part of larger and more personal vision and set of goals. Unscripted is a web service where the world logic is independent from the bot minds. That architecture could help with the desire to enforce zero prior knowledge by initially concealing the logic and structure of the world from people who build the bot minds (and the bots themselves). Other major differences between the Gym and Unscripted: evolutionary mechanisms will be at the heart of the framework, the focus is on human-like situations and problems (and hence do not necessarily have optimal solutions or sequence of actions), it is multi-agents, it should allow the exploration of other questions than pure AI.
+
+* **WestWorld**: a movie and a TV series about a theme park populated by ultra-realistic bots. Unscripted is similar in the sense that we provide a world with human-like bots where naratives are important. What's different in Unscripted: bots are not 'coded'; the narratives are not scripted; the artificial world is virtual, much simpler than reality and not-photorealistic; humans may enter the world but their 'body', characteristics and privileges will be identical to bots, only the mind will differ; bots can reproduce.
 
 # Open questions
 
