@@ -79,6 +79,7 @@ Main components:
 
 * bots can reproduce
 * bots can inherit from parents
+* bots should define the genetic material of their mind (i.e. enough information to build a new mind, info can be mutated and combined with others)
 
 ## Phase 5 and beyond: TBC
 * communication
@@ -103,8 +104,9 @@ If successfull, the initial project can lead to many interesting research strand
 
 # Similar projects
 
-* **Open AI Gym**: an open and standardising framework for experimenting with reinforcement learning and comparing results. There are many things in common with Unscripted and it is maintained by experts in the field of AI. Unscripted has a similar purpose.
-I have thought about this a long time ago and never had the time or chance to do anything about it so I decided to give it a shot anyway even if it fails or may look very naive compared to other projects like Open AI Gym. The Unscripted framework has more baggage (which is a disadvantage) because it's part of larger and more personal vision and set of goals. Unscripted is a web service where the world logic is independent from the bot minds. That architecture could help with the desire to enforce zero prior knowledge by initially concealing the logic and structure of the world from people who build the bot minds (and the bots themselves). Other major differences between the Gym and Unscripted: evolutionary mechanisms will be at the heart of the framework, the focus is on human-like situations and problems (and hence do not necessarily have optimal solutions or sequence of actions), it is multi-agents, it should allow the exploration of other questions than pure AI.
+* **Open AI Gym**: an open and standardising framework maintained by AI experts to let researchers experiment with reinforcement learning algorithms/models and compare the results. There are many things in common with Unscripted.
+
+I have thought about this a long time ago and never had the time or chance to do anything about it so I decided to give it a shot anyway, even if it fails or may look very naive compared to other projects like Open AI Gym. The Unscripted framework has more baggage (which is a disadvantage) because it's part of larger and more personal vision and set of goals. Unscripted is a web service where the world logic is independent from the bot minds. That architecture could help with the desire to enforce zero prior knowledge by initially concealing the logic and structure of the world from people who build the bot minds (and the bots themselves). Other major differences between the Gym and Unscripted: evolutionary mechanisms will be at the heart of the framework, the focus is on human-like situations and problems (and hence do not necessarily have optimal solutions or sequence of actions), it is multi-agents, it should allow the exploration of other questions than pure AI.
 
 # Open questions
 
