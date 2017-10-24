@@ -19,7 +19,7 @@ If you borrow anything from here, please be nice and give credit or link back to
 ## Why?
 Have you ever watched a film, read a book, played an adventure or RPG game and got really immersed into that world but left wanting for more? You enjoyed the quests, the backstories, the characters, the turn of events, ... but you often noticed that it is all scripted. It is a limited construct authored by humans. They let you glimpse at their fabricated world. You only see and experience the narrative paths designed for you. You have limited choices among pre-written dialogues, cut-off scenes. 
 
-Ever wished you could ask questions to anybody in that story, interact your own way and get responses which are their own? Whished you could go on a tangent, digress to something completely different? You could delve into a minor side-story or secondary characters you found more interesting? Wished that world was as limitless and free as reality. Something unscripted. Without plot-holes because characters have a real past, because your story is part of a real, single, coherent history in a fictional world. 
+Ever wished you could ask questions to anybody in that story, interact your own way and get responses which are their own? Whished you could go on a tangent, digress to something completely different? You could delve into a minor side-story or secondary characters you found more interesting? Wished that world was as limitless and free as reality. Something unscripted. Without plot-holes because characters have a real past, because your story is part of a real, single, coherent history in a fictional world. Imagine WestWorld without narratives created by humans an false memories.
 
 I don't think it is fully possible but I'm convinced we can do better than the dominant fictional models, than what you find in a book, a movie, a game, etc. 
 
@@ -100,6 +100,11 @@ If successfull, the initial project can lead to many interesting research strand
 * study of agent-human interactions
 * video game NPCs that are not dumb or predictable 
 * ...
+
+# Similar projects
+
+* **Open AI Gym**: an open and standardising framework for experimenting with reinforcement learning and comparing results. There are many things in common with Unscripted and it is maintained by experts in the field of AI. Unscripted has a similar purpose.
+I have thought about this a long time ago and never had the time or chance to do anything about it so I decided to give it a shot anyway even if it fails or may look very naive compared to other projects like Open AI Gym. The Unscripted framework has more baggage (which is a disadvantage) because it's part of larger and more personal vision and set of goals. Unscripted is a web service where the world logic is independent from the bot minds. That architecture could help with the desire to enforce zero prior knowledge by initially concealing the logic and structure of the world from people who build the bot minds (and the bots themselves). Other major differences between the Gym and Unscripted: evolutionary mechanisms will be at the heart of the framework, the focus is on human-like situations and problems (and hence do not necessarily have optimal solutions or sequence of actions), it is multi-agents, it should allow the exploration of other questions than pure AI.
 
 # Open questions
 
