@@ -1,6 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 from collections import OrderedDict
-from .things.thing import Thing
+from .things.thing import Thing, ThingParentError
+from django.core.exceptions import ObjectDoesNotExist
 
 API_VERSION = '1.0.0'
 
@@ -63,6 +64,8 @@ class UnscriptedAPI(object):
         link = self.get_link_from_thing(thing)
         if link:
             ret['link'] = [link]
+        if 1:
+            ret['_class'] = thing.__class__.__name__
         if 0 and thing.parentid:
             ret['link'] = [self.get_link_from_thing(thing.parent), 'parent']
         return ret
@@ -86,24 +89,48 @@ class UnscriptedAPI(object):
                     'href': self.get_href(item['path'])
                 }]
         else:
-            resource_type = parts[0]
-            module = self.get_singular(parts[0])
-            athing = Thing.new(module=module)
+            parentid = None
+            if len(parts) > 2:
+                parts.pop(0)
+                parentid = parts.pop(0)
+
+            resource_type = parts.pop(0)
+            module = self.get_singular(resource_type)
+            athing = Thing.new(module=module, parentid=parentid)
             
             if athing:
-                thingid = None if len(parts) < 2 else parts[1]
-                things = athing.__class__.objects.filter(module=module)
-                print things.query
+                thingid = parts.pop(0) if parts else None
+                things = athing.__class__.objects.all()
+                if parentid:
+                    things = things.filter(parentid=parentid)
+                    
                 if thingid:
                     api_method = '%s.get' % resource_type
-                    things = things.filter(pk=thingid)
+                    #things = things.filter(pk=thingid)
+                    try:
+                        things = [things.get(pk=thingid)]
+                    except ObjectDoesNotExist:
+                        self.errors.append({
+                            'code': 404,
+                            'message': 'Resource not found: %s.id = %s' % (module, thingid)
+                        })
                 else:
                     api_method = '%s.get' % resource_type
 
                     if self.method == 'POST':
                         api_method = '%s.post' % resource_type
-                        athing.save()
-                        things = [athing]
+                        try:
+                            athing.save()
+                        except ThingParentError, e:
+                            self.errors.append({
+                                'code': 403,
+                                'message': str(e)
+                            })
+                            
+                        if athing.pk:
+                            things = [athing]
+                        else:
+                            things = []
 
                 if self.method == 'DELETE':
                     api_method = '%s.delete' % resource_type
@@ -125,7 +152,7 @@ class UnscriptedAPI(object):
         else:
             self.errors.append({
                 'code': 404,
-                'message': 'Resource type not found: %s' % parts[0]
+                'message': 'Resource type not found: %s' % resource_type
             })
             
     def get_singular(self, module_plural):

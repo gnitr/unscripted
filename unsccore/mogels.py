@@ -4,6 +4,7 @@ import re
 import json
 from datetime import datetime
 from bson.objectid import ObjectId
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 def get_class_name_from_module_key(module_key):
     ''' my_class -> MyClass '''
@@ -64,7 +65,6 @@ class MongoQuerySet(object):
     
     def all(self):
         ret = self.clone()
-        ret.reset_query()
         return ret
 
     def filter(self, **filters):
@@ -72,6 +72,22 @@ class MongoQuerySet(object):
         if filters:
             ret.query['filters'].update(filters)
         return ret
+    
+    def __getitem__(self, key):
+        # can raise IndexError
+        cursor = self._get_cursor()
+        return self.doc_class.new(**cursor[key])
+    
+    def get(self, **filters):
+        print 'GET'
+        docs = self.filter(**filters)
+        c = docs.count()
+        if c == 0:
+            raise ObjectDoesNotExist()
+        if c > 1:
+            raise MultipleObjectsReturned()
+        return docs[0]
+        
 
     def order_by(self, key):
         self.query['order'] = key
@@ -81,7 +97,7 @@ class MongoQuerySet(object):
         ret = None
         cursor = self._get_cursor()
         try:
-            ret = self.doc_class(**cursor[0])
+            ret = self.doc_class.new(**cursor[0])
         except IndexError, e:
             pass
         return ret
@@ -98,7 +114,6 @@ class MongoQuerySet(object):
             # TODO: query
             
             filters = {}
-            print self.query
             if self.query['filters']:
                 for k, v in self.query['filters'].iteritems():
                     if k == 'pk': 
@@ -127,7 +142,6 @@ class MongoQuerySet(object):
 
     def _mongo_replace_one(self, doc):
         collection = self._get_collection()
-        #print repr(doc.pk)
         if doc.pk:
             collection.replace_one({'_id': doc._id}, doc._get_doc())
         else:
@@ -181,7 +195,6 @@ class MongoDocument(object):
             if not callable(a):
                 ret[k] = a
         
-        #print ret
         return ret
     
     def get_json_dict(self, idkey='pk'):
@@ -222,6 +235,14 @@ class MongoDocumentModule(MongoDocument):
         return super(MongoDocumentModule, cls).new(**doc)
             
     
+    @classmethod
+    def get_objects(cls):
+        ret = super(MongoDocumentModule, cls).get_objects()
+        ret = ret.filter(module=cls.get_module_key())
+        return ret
+
+    objects = ClassProperty(get_objects)
+
     @classmethod
     def get_module_key(cls):
         return get_key_from_class_name(cls.__name__)

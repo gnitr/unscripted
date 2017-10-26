@@ -9,9 +9,9 @@ Phase 1
 . Web api framework:
     [DONE] create a world        POST /worlds
     [DONE] list words            GET /worlds
-    . remove a world        DEL /worlds/X
-    . things in a world     GET /worlds/X/things
-    . create a bot          POST /worlds/X/things
+    [DONE] remove a world        DEL /worlds/X
+    [DONE] create a bot          POST /worlds/X/bots
+    [DONE] things in a world     GET /worlds/X/things
     . move bot              POST /things/Y/actions/walk/X?angle=0.3
 . Crude visualisation
     [done] web page

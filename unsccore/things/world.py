@@ -1,4 +1,4 @@
-from .thing import Thing
+from .thing import Thing, ThingParentError
 from random import random
 
 class World(Thing):
@@ -14,12 +14,16 @@ class World(Thing):
     
     def walk(self, actor, angle=0.0):
         actor.move(angle=angle)
-        
 
-    def add_thing(self, thing):
-        thing.parentid = self.pk
-        thing.pos = self.get_random_pos()
-        thing.save()
-    
     def get_random_pos(self):
         return [dim * random() for dim in self.dims]
+    
+    def before_inserting_child(self, child):
+        child.pos = self.get_random_pos()
+        pass
+
+    def before_changing_parent(self):
+        if self.parentid:
+            raise ThingParentError('Cannot move World X inside something else')
+
+
