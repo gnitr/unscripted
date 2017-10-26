@@ -18,11 +18,11 @@ class World(Thing):
     def get_random_pos(self):
         return [dim * random() for dim in self.dims]
     
-    def before_inserting_child(self, child):
+    def _before_inserting_child(self, child):
         child.pos = self.get_random_pos()
         pass
 
-    def before_changing_parent(self):
+    def _before_changing_parent(self):
         if self.parentid:
             raise ThingParentError('Cannot move World X inside something else')
 

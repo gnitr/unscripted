@@ -1,8 +1,8 @@
 Phase 1
 
-[done] Django project and apps skeletons
-[] Rewrite models witj MongoDB bue to Thing inheritence and flexible schema
-[done] Dummy models for
+[DONE] Django project and apps skeletons
+[DONE] Rewrite models with MongoDB bue to Thing inheritence and flexible schema
+[DONE] Dummy models for
     . Thing
     . World
     . Bot
@@ -13,11 +13,16 @@ Phase 1
     [DONE] create a bot          POST /worlds/X/bots
     [DONE] things in a world     GET /worlds/X/things
     . move bot              POST /things/Y/actions/walk/X?angle=0.3
+    . change parentid to objectid 
 . Crude visualisation
     [done] web page
     [] get world data with web api
     [] very basic visualisation of bots on world map
-. System for consistent IDs across the different layers:
+. 
+() Command line tool that reflects Web API
+    . ucore
+    . create-POST, read-GET, update-PUT, rm-DELETE
+[DONE] System for consistent IDs across the different layers:
     . Mongo doc._id (ObjectId) <-> Thing.pk (str) <-> api item.id (str)
 . release online
     . pb with domain config on web hosting side, site still links to godaddy

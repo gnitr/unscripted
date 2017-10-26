@@ -14,11 +14,69 @@ def get_key_from_class_name(class_name):
     ''' MyClass -> my_class'''
     return re.sub(r'([A-Z])', r'_\1', class_name).strip('_').lower()
 
+# dictionary conversion among 
+# Mongo DB document, Django Model __dict__ and Web API json dict
+def get_mongo_dict_from_model_dict(d):
+    ret = {}
+    for k, v in d.iteritems():
+        if callable(v): 
+            print 'CALLABLE %s %s' % (k, v)
+        if k.startswith('_'): continue
+        if k == 'pk':
+            k = '_id'
+        if k == '_id' and v is None:
+            continue
+        if isinstance(v, dict):
+            v = get_mongo_dict_from_model_dict(v)
+        elif isinstance(v, basestring) and len(v) == len('59ea5544274d0a2924d8b06b') and k.endswith('id'):
+            v = ObjectId(v)
+        ret[k] = v
+    return ret
+
+def get_model_dict_from_mongo_dict(d):
+    ret = {}
+    for k, v in d.iteritems():
+        if k == '_id':
+            k = 'pk'
+        if k.startswith('_'): continue
+        if isinstance(v, dict):
+            v = get_model_dict_from_mongo_dict(v)
+        elif isinstance(v, ObjectId):
+            v = str(v)
+        ret[k] = v
+    return ret
+
+def get_api_dict_from_model_dict(d):
+    ret = {}
+    for k, v in d.iteritems():
+        if k == 'pk':
+            k = 'id'
+        if k.startswith('_'): continue
+        if isinstance(v, dict):
+            v = get_api_dict_from_model_dict(v)
+        ret[k] = v
+    return ret
+
+def get_model_dict_from_api_dict(d):
+    ret = {}
+    for k, v in d.iteritems():
+        if k == 'id':
+            k = 'pk'
+        if k.startswith('_'): continue
+        if isinstance(v, dict):
+            v = get_model_dict_from_api_dict(v)
+        ret[k] = v
+    return ret
+
 class ClassProperty(property):
     def __get__(self, cls, owner):
         return self.fget.__get__(None, owner)()
 
 class MongoQuerySet(object):
+    '''
+    A pymongo query builder and cursor over a result 
+    that implements some of the django QuerySet interface.
+    '''
     # TODO: any call modifying the query should return a NEW instance
     # e.g. q = .all(); q2 = q.filter(pk=123)
     
@@ -79,7 +137,6 @@ class MongoQuerySet(object):
         return self.doc_class.new(**cursor[key])
     
     def get(self, **filters):
-        print 'GET'
         docs = self.filter(**filters)
         c = docs.count()
         if c == 0:
@@ -113,16 +170,9 @@ class MongoQuerySet(object):
             collection = self._get_collection()
             # TODO: query
             
-            filters = {}
-            if self.query['filters']:
-                for k, v in self.query['filters'].iteritems():
-                    if k == 'pk': 
-                        k = '_id'
-                        #if isinstance(v, basestring) and len(v) == len('59ea5544274d0a2924d8b06b') and k.endswith('id'):
-                        v = ObjectId(v)
-                    filters[k] = v
-                # TODO: works for simple care field=value
-                # but need to convert django operators to mongo
+            filters = get_mongo_dict_from_model_dict(self.query['filters'])
+            # TODO: works for simple care field=value
+            # but need to convert django operators to mongo
 
             print 'MONGO FIND (%s)' % repr(filters)
             self.cursor = collection.find(filters)
@@ -140,26 +190,40 @@ class MongoQuerySet(object):
             self.query_executed_hash = query_hash
         return self.cursor
 
-    def _mongo_replace_one(self, doc):
+    def _mongo_replace_one(self, model):
         collection = self._get_collection()
-        if doc.pk:
-            collection.replace_one({'_id': doc._id}, doc._get_doc())
+        doc = model._get_mongo_dict()
+        if doc.get('_id'):
+            collection.replace_one({'_id': doc['_id']}, doc)
         else:
-            doc._id = collection.insert_one(doc._get_doc()).inserted_id
+            model.pk = str(collection.insert_one(doc).inserted_id)
 
-    def _mongo_delete_one(self, doc):
-        filter = {'_id': ObjectId(doc.pk)}
-        self._get_collection().delete_one(filter)
+    def _mongo_delete_one(self, model):
+        doc = model._get_mongo_dict()
+        self._get_collection().delete_one({'_id': doc['_id']})
 
     def count(self):
         return self._get_cursor().count()
 
-class MongoDocument(object):
+class MongoModel(object):
+    '''
+    A pymongo object wrapper that  
+    that implements some of the django Model interface.
+    
+    The object instance variables that don't start with _
+    are used both like django model attributes and
+    mongodb field.
+    
+    _get_doc and _set_doc do the conversion 
+    between the dajngo model and mongo document. 
+    
+    The primary key field is called 'pk', NOT 'id'.
+    '''
     
     def __init__(self, **kwargs):
         # _id is a Mongo ObjectId(); self.pk is a django id (string)
-        self._id = None
-        self._set_doc(kwargs)
+        self.pk = None
+        self._set_mongo_dict(kwargs)
     
     class Meta:
         db_table = 'my_collection'
@@ -182,38 +246,27 @@ class MongoDocument(object):
     def delete(self):
         self.objects._mongo_delete_one(self)
 
-    def _set_doc(self, doc):
-        for k, v in doc.iteritems():
+    def _set_mongo_dict(self, doc):
+        for k, v in get_model_dict_from_mongo_dict(doc).iteritems():
             setattr(self, k, v)
 
-    def _get_doc(self):
-        ret = {}
-        for k in self.__dict__:
-            if k.startswith('_') and (k not in ['_id'] or self._id is None):
-                continue
-            a = getattr(self, k)
-            if not callable(a):
-                ret[k] = a
-        
-        return ret
+    def _get_mongo_dict(self):
+        return get_mongo_dict_from_model_dict(self.__dict__)
     
-    def get_json_dict(self, idkey='pk'):
-        ret = self._get_doc()
-        ret[idkey] = self.pk
-        if '_id' in ret: del ret['_id']
-        return ret
+    def get_api_dict(self):
+        return get_api_dict_from_model_dict(self.__dict__)
     
-    def get_pk(self):
-        return str(self._id) if self._id else None
- 
-    def set_pk(self, pk):
-        self._id = ObjectId(pk) if pk else None
-         
-    pk = property(get_pk, set_pk)
-
     objects = ClassProperty(get_objects)
     
-class MongoDocumentModule(MongoDocument):
+class MongoDocumentModule(MongoModel):
+    '''
+    A MongoModel that allow to store variants of the same documents within
+    the same collection. Each variant is called a module and has its own set of
+    fields.
+    
+    self.module: determine the variant, it is also the name of the python module
+    and class that will be used to instantiate the model object.
+    '''
     
     def __init__(self, **kwargs):
         self.module = self.get_module_key()

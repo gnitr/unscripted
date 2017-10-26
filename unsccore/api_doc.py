@@ -1,4 +1,4 @@
-UNSCRITPED_API_ENTRY_POINTS = [
+UNSCRIPTED_API_ENTRY_POINTS = [
     {
         'path': 'worlds',
         'desc': 'Returns worlds',

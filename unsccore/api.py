@@ -60,7 +60,7 @@ class UnscriptedAPI(object):
         return ret
     
     def get_json_data_from_thing(self, thing):
-        ret = thing.get_json_dict(idkey='id')
+        ret = thing.get_api_dict()
         link = self.get_link_from_thing(thing)
         if link:
             ret['link'] = [link]
@@ -71,6 +71,7 @@ class UnscriptedAPI(object):
         return ret
 
     def _process(self):
+        # TODO: too long, break into sub-methods
         parts = [p for p in self.path.strip('/').split('/') if p]
         
         self.response['method'] = ''
@@ -79,7 +80,7 @@ class UnscriptedAPI(object):
         
         if len(parts) < 1:
             api_method = 'api.get'
-            from .api_doc import UNSCRITPED_API_ENTRY_POINTS as DOC
+            from .api_doc import UNSCRIPTED_API_ENTRY_POINTS as DOC
             data = {
                 'items': DOC
             }

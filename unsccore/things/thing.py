@@ -1,9 +1,18 @@
 from unsccore import mogels
+from bson.objectid import ObjectId
 
 class ThingParentError(Exception):
     pass
 
 class Thing(mogels.MongoDocumentModule):
+    '''
+    A Thing is an abstract ancestor class to all things in the virtual world.
+    
+    It introduces fields common to all things:
+        pos: the thing's position as 3d vector 
+        dims: the thing's dimensions as 3d vector
+        parentid: the pk of the thing that contains it
+    '''
     
     class Meta:
         db_table = 'things'
@@ -31,6 +40,15 @@ class Thing(mogels.MongoDocumentModule):
         )
         return ret
     
+    def _set_doc(self, doc):
+        super(Thing, self)._set_doc(doc)
+        self.parentid = str(doc['parentid']) if doc['parentid'] else None
+
+    def _get_doc(self):
+        ret = super(Thing, self)._get_doc()
+        ret['parentid'] = ObjectId(self.parentid) if self.parentid else None
+        return ret
+    
     def move(self):
         pass
     
@@ -54,28 +72,18 @@ class Thing(mogels.MongoDocumentModule):
     def save(self):
         
         if self.parentid != self._parentid_valid:
-            self.before_changing_parent()
-        
-#             if self.parentid:
-#                 print 'h1'
-#                 print self.parent._get_doc()
-#                 print self.parent.__class__
-#                 self.parent.add_thing(self)
-#             else:
-#                 if not self.can_be_root():
-#                     raise ThingParentError('%s save() error. The object must have a valid parent. None specified.' % self.module)
-#                 self._parentid_valid = self.parentid
+            self._before_changing_parent()
         
         super(Thing, self).save()
         self._parentid_valid = self.parentid
         
-    def before_changing_parent(self):
+    def _before_changing_parent(self):
         if self.parentid:
-            self.parent.before_inserting_child(self)
+            self.parent._before_inserting_child(self)
         if self.__class__ == Thing:
             raise ThingParentError('Generic Things cannot be added. Please add specific things.')
     
-    def before_inserting_child(self, child):
+    def _before_inserting_child(self, child):
         raise ThingParentError('Y refuses insertion of child X')
 
     def delete(self):
