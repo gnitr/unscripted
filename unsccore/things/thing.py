@@ -6,13 +6,16 @@ class Thing(mogels.MongoDocumentModule):
         db_table = 'things'
 
     def __init__(self, **kwargs):
-        self.pos = [0.0] * 3
-        self.dims = [1.0] * 3
-        self.parentid = None
-        super(Thing, self).__init__(**kwargs)
+        defaults = {
+            'pos': [0.0] * 3,
+            'dims': [1.0] * 3,
+            'parentid': None
+        }
+        defaults.update(kwargs)
+        super(Thing, self).__init__(**defaults)
     
     def spprint(self):
-        print self._get_doc()
+        #print self._get_doc()
         ret = '# %s %s <%s|%s> (%s, %s, %s)' % (
             self.pk,
             self.created,
@@ -24,3 +27,10 @@ class Thing(mogels.MongoDocumentModule):
     def move(self):
         pass
     
+    def delete(self):
+        # A in B in C
+        # Delete B
+        # => A in C
+        # TODO: deal with children and parents
+        
+        super(Thing, self).delete()

@@ -6,8 +6,11 @@ class World(Thing):
     
     '''
     def __init__(self, **kwargs):
-        self.dims = [100.0] * 3
-        super(World, self).__init__(**kwargs)
+        defaults = {
+            'dims': [100.0] * 3,
+        }
+        defaults.update(kwargs)
+        super(World, self).__init__(**defaults)
     
     def walk(self, actor, angle=0.0):
         actor.move(angle=angle)

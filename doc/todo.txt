@@ -7,16 +7,18 @@ Phase 1
     . World
     . Bot
 . Web api framework:
-    . create a world    POST /worlds
-    . list words        GET /worlds
-    . remove a world    DEL /worlds/X
-    . create a bot      POST /worlds/X/things
-    . move bot          POST /worlds/X/things/Y/actions/walk/X?angle=0.3
-    . get all world data    GET /worlds/X/things
+    [DONE] create a world        POST /worlds
+    [DONE] list words            GET /worlds
+    . remove a world        DEL /worlds/X
+    . things in a world     GET /worlds/X/things
+    . create a bot          POST /worlds/X/things
+    . move bot              POST /things/Y/actions/walk/X?angle=0.3
 . Crude visualisation
     [done] web page
     [] get world data with web api
     [] very basic visualisation of bots on world map
+. System for consistent IDs across the different layers:
+    . Mongo doc._id (ObjectId) <-> Thing.pk (str) <-> api item.id (str)
 . release online
     . pb with domain config on web hosting side, site still links to godaddy
     

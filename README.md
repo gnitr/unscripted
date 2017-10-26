@@ -59,10 +59,12 @@ Main components:
 
 ## Phase 1: Skeleton architecture (In progress, started Oct 2017)
 
-* empty world (a 2D square with no non-living objects)
-* Web API
-* Dumb bot: random walk, nothing else
+* empty world (a 2D square with bots only)
 * 2D grid rendering in a web page
+* basic world engine running in the background
+* dumb bot: random walk, nothing else
+* run bot as a background process
+* Web API
 
 ## Phase 2: Interaction with objects
 

@@ -13,9 +13,6 @@ class Command(BaseCommand):
         parser.add_argument('ids', nargs='*', type=str)
 
     def handle(self, *args, **options):
-        #print args
-        #print options
-        
         found = 0
         
         if 'world' in options['class']:

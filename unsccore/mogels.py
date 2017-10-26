@@ -18,17 +18,28 @@ class ClassProperty(property):
         return self.fget.__get__(None, owner)()
 
 class MongoQuerySet(object):
+    # TODO: any call modifying the query should return a NEW instance
+    # e.g. q = .all(); q2 = q.filter(pk=123)
     
     _client = None
     _db = None
     
     def __init__(self, doc_class):
-        self.query = {'filters': {}, 'order': None}
+        self.reset_query()
         self.query_executed_hash = None
         self.doc_class = doc_class
         
+    def reset_query(self):
+        self.query = {'filters': {}, 'order': None}
+    
+    def clone(self):
+        import copy
+        ret = MongoQuerySet(self.doc_class)
+        ret.query = copy.deepcopy(self.query)
+        return ret
+    
     def __iter__(self):
-        return self
+        return self.clone()
     
     def next(self):
         cursor = self._get_cursor()
@@ -52,12 +63,15 @@ class MongoQuerySet(object):
         return obj
     
     def all(self):
-        return self
+        ret = self.clone()
+        ret.reset_query()
+        return ret
 
     def filter(self, **filters):
+        ret = self.clone()
         if filters:
-            self.query['filters'].update(filters)
-        return self
+            ret.query['filters'].update(filters)
+        return ret
 
     def order_by(self, key):
         self.query['order'] = key
@@ -84,16 +98,18 @@ class MongoQuerySet(object):
             # TODO: query
             
             filters = {}
+            print self.query
             if self.query['filters']:
                 for k, v in self.query['filters'].iteritems():
-                    if k == 'pk': k = '_id'
-                    if isinstance(v, basestring) and len(v) == len('59ea5544274d0a2924d8b06b') and k.endswith('id'):
+                    if k == 'pk': 
+                        k = '_id'
+                        #if isinstance(v, basestring) and len(v) == len('59ea5544274d0a2924d8b06b') and k.endswith('id'):
                         v = ObjectId(v)
                     filters[k] = v
                 # TODO: works for simple care field=value
                 # but need to convert django operators to mongo
 
-            print filters
+            print 'MONGO FIND (%s)' % repr(filters)
             self.cursor = collection.find(filters)
                 
             if self.query['order']:
@@ -104,11 +120,22 @@ class MongoQuerySet(object):
                     order = [field_name, pymongo.ASCENDING]
                     if field_name != field: order[1] = pymongo.DESCENDING
                     orders.append(order)
-                print orders
                 self.cursor.sort(orders)
             
             self.query_executed_hash = query_hash
         return self.cursor
+
+    def _mongo_replace_one(self, doc):
+        collection = self._get_collection()
+        #print repr(doc.pk)
+        if doc.pk:
+            collection.replace_one({'_id': doc._id}, doc._get_doc())
+        else:
+            doc._id = collection.insert_one(doc._get_doc()).inserted_id
+
+    def _mongo_delete_one(self, doc):
+        filter = {'_id': ObjectId(doc.pk)}
+        self._get_collection().delete_one(filter)
 
     def count(self):
         return self._get_cursor().count()
@@ -116,6 +143,7 @@ class MongoQuerySet(object):
 class MongoDocument(object):
     
     def __init__(self, **kwargs):
+        # _id is a Mongo ObjectId(); self.pk is a django id (string)
         self._id = None
         self._set_doc(kwargs)
     
@@ -134,37 +162,42 @@ class MongoDocument(object):
         ret = MongoQuerySet(cls)
         return ret
     
+    def save(self):
+        self.objects._mongo_replace_one(self)
+
+    def delete(self):
+        self.objects._mongo_delete_one(self)
+
     def _set_doc(self, doc):
         for k, v in doc.iteritems():
             setattr(self, k, v)
-        
+
     def _get_doc(self):
         ret = {}
         for k in self.__dict__:
-            if k.startswith('_'):
+            if k.startswith('_') and (k not in ['_id'] or self._id is None):
                 continue
             a = getattr(self, k)
             if not callable(a):
                 ret[k] = a
         
+        #print ret
+        return ret
+    
+    def get_json_dict(self, idkey='pk'):
+        ret = self._get_doc()
+        ret[idkey] = self.pk
+        if '_id' in ret: del ret['_id']
         return ret
     
     def get_pk(self):
-        return self._id
-
+        return str(self._id) if self._id else None
+ 
     def set_pk(self, pk):
-        self._id = pk
-        
+        self._id = ObjectId(pk) if pk else None
+         
     pk = property(get_pk, set_pk)
-    
-    def save(self):
-        collection = self.objects._get_collection()
-        doc = self._get_doc()
-        if self.pk:
-            collection.replace_one({'_id': self.pk}, doc)
-        else:
-            self.pk = collection.insert_one(doc).inserted_id
-            
+
     objects = ClassProperty(get_objects)
     
 class MongoDocumentModule(MongoDocument):
@@ -180,7 +213,10 @@ class MongoDocumentModule(MongoDocument):
         import importlib
         module_key = doc.get('module', None)
         if module_key:
-            module = importlib.import_module('.'+module_key, 'unsccore.things')
+            try:
+                module = importlib.import_module('.'+module_key, 'unsccore.things')
+            except ImportError:
+                return None
             doc_class = getattr(module, get_class_name_from_module_key(module_key), None)
             return doc_class(**doc)
         return super(MongoDocumentModule, cls).new(**doc)
@@ -189,5 +225,12 @@ class MongoDocumentModule(MongoDocument):
     @classmethod
     def get_module_key(cls):
         return get_key_from_class_name(cls.__name__)
+    
+    def get_module_key_plural(self):
+        ret = self.module
+        # TODO: do other cheap pluralisations
+        # anything beyond that has to be overridden by subclasses
+        ret += 's'
+        return ret
     
     
