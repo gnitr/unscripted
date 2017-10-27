@@ -17,5 +17,5 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    url(r'^worlds/', views.view_worlds, name="unsc_worlds"),
+    url(r'^worlds/(?P<worldid>[0-9a-f]+)/$', views.view_worlds, name="unsc_worlds"),
 ]

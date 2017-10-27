@@ -140,7 +140,7 @@ class MongoQuerySet(object):
         docs = self.filter(**filters)
         c = docs.count()
         if c == 0:
-            raise ObjectDoesNotExist()
+            raise ObjectDoesNotExist('Thing not found (%s)' % repr(filters))
         if c > 1:
             raise MultipleObjectsReturned()
         return docs[0]

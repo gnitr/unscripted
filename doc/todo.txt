@@ -13,7 +13,7 @@ Phase 1
     [DONE] create a bot          POST /worlds/X/bots
     [DONE] things in a world     GET /worlds/X/things
     . move bot              POST /things/Y/actions/walk/X?angle=0.3
-    . change parentid to objectid 
+    [DONE] change parentid to objectid 
 . Crude visualisation
     [done] web page
     [] get world data with web api

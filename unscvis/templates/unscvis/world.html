@@ -1,7 +1,120 @@
 {% extends "base.html" %}
+{% load unsctags %}
+
+{% block css %}
+    {{ block.super }}
+    <style type="text/css">
+        #vis-container {
+            width: 100%;
+            height: 20em;
+        }
+        
+        #cnv-world {
+            border: 1px solid grey;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+{% endblock %}
 
 {% block content %}
-    <div>
-        WORLD
+    <div id="vis-container">
     </div>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    {# https://bl.ocks.org/mbostock/d1f7b58631e71fbf9c568345ee04a60e #}
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+        
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/2.5.0/babylon.js">
+    </script>
+ 
+    <script>
+    $(function(){
+        window.world = {{ world.get_api_dict|json }};
+        window.vis = {
+            canvas: null,
+            context: null,
+            engine: null,
+            scene: null,
+            camera: null
+        };
+      
+        function request_world() {
+            $.getJSON('http://localhost:8000/api/1/worlds/'+window.world.id+'/things', function(response) {
+                render_things(response.data.items);
+            });
+        }
+        
+        function render_things(things) {
+            var cx = get_canvas_context();
+            //cx.fillStyle = '#000000';
+            //ctx.fillRect(0,0,);
+            //console.log(cx);
+            console.log(things);
+        }
+        
+        function create_scene() {
+            var vis = window.vis;
+            vis.scene = new BABYLON.Scene(vis.engine);
+            
+            vis.radius = window.world.dims[0];
+            if (window.world.dims[0] < window.world.dims[1]) {
+                vis.radius = window.world.dims[1];
+            }
+            
+            vis.camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2, vis.radius * 2, BABYLON.Vector3.Zero(), vis.scene);
+            vis.camera.attachControl(vis.canvas, true);
+
+            // Add lights to the scene
+            var light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), vis.scene);
+            var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), vis.scene);
+
+            // Add and manipulate meshes in the scene
+            //var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:2}, vis.scene);
+            var map = BABYLON.MeshBuilder.CreatePlane("map", {width: window.world.dims[0], height: window.world.dims[1]}, vis.scene);
+
+            return vis.scene;
+        }
+
+        function get_canvas_context() {
+            var ret = window.vis.context;
+            
+            if (!ret) {
+                var $div = $('#vis-container');
+                var vis = window.vis;
+                
+                if (0) {
+                    var width = $div.width();
+                    var height = $div.height();
+                    $('#vis-container').html('<canvas id="cnv-world" width="'+width+'" height="'+height+'"></canvas>');
+                    canvas = $('#cnv-world')[0];
+                    ret = vis.canvas.getContext('2d');
+                } else {
+                    $('#vis-container').html('<canvas id="cnv-world" touch-action="none"></canvas>');
+                    vis.canvas = $('#cnv-world')[0];
+                    vis.engine = new BABYLON.Engine(vis.canvas, true);
+                    ret = create_scene();
+
+                    vis.engine.runRenderLoop(function () {
+                        vis.scene.render();
+                    });
+
+                    window.addEventListener("resize", function () {
+                        vis.engine.resize();
+                    });
+                }
+                vis.context = ret;
+            }
+            return ret;
+        }
+        
+        request_world();
+        
+        //window.setInterval(request_world, 1000);
+    });
+   </script>
 {% endblock %}
