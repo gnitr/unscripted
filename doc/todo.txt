@@ -13,21 +13,23 @@ Phase 1
     [DONE] create a bot          POST /worlds/X/bots
     [DONE] things in a world     GET /worlds/X/things
     . move bot              POST /things/Y/actions/walk/X?angle=0.3
-    [DONE] change parentid to objectid 
+    [DONE] change parentid to objectid
+    . use y has real height from ground 
 . Crude visualisation
     [DONE] web page
     [DONE] get world data with web api
     . improve the low perf, 50% cpu on i7 for an empty map is prohibitive
     [DONE] very basic visualisation of bots on world map
     . camera:
-        . add ability to move the camera (not just rotate and zoom)
-        . rotate camera around itself
-        . prevent camera to show reverse of ground
+        () add ability to move the camera (not just rotate and zoom)
+        () rotate camera around itself
+        [DONE] prevent camera to show reverse of ground
         . remember the last camera settings
+        . follow bot mode
     [DONE] click on a bot
     . better colors for ground
-    . better colors for bots
-    . update the positions
+    [DONE] better colors for bots
+    [DONE] update the positions
 . 
 () Command line tool that reflects Web API
     . ucore

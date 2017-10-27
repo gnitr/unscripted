@@ -6,7 +6,7 @@
     <style type="text/css">
         #vis-container {
             width: 100%;
-            height: 20em;
+            height: 100%;
         }
         
         #cnv-world {
@@ -21,10 +21,12 @@
     </style>
 {% endblock %}
 
-{% block content %}
-    <div id="vis-container">
-    </div>
-    <div id="info-box">
+{% block body %}
+    <div id="viewer">
+        <div id="vis-container">
+        </div>
+        <div id="info-box">
+        </div>
     </div>
 {% endblock %}
 
@@ -35,12 +37,14 @@
         integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
         crossorigin="anonymous"></script>
         
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/2.5.0/babylon.js">
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/2.5.0/babylon.js"></script>
+    <script src="/static/unscvis/utils.js"></script>
  
     <script>
     $(function(){
-        window.world = {{ world.get_api_dict|json }};
+    	window.unscutils.elastic_element($('#viewer'), function() {}, 10, 10);
+    	
+    	window.world = {{ world.get_api_dict|json }};
         window.things = {};
         window.vis = {
             canvas: null,
@@ -71,32 +75,35 @@
         
         function draw_thing(thing) {
             var vis = window.vis;
-            var box = BABYLON.MeshBuilder.CreateBox(
-                thing.id, 
-                {
-                    width: thing.dims[0],
-                    depth: thing.dims[1],
-                    height: thing.dims[2],
-                    //height: 20,
-                }, 
-                vis.scene
-            );
+            
+            var box = vis.scene.getMeshByName(thing.id);
+            if (!box) {
+                box = BABYLON.MeshBuilder.CreateBox(
+                        thing.id, 
+                        {
+                            width: thing.dims[0],
+                            depth: thing.dims[1],
+                            height: thing.dims[2],
+                        }, 
+                        vis.scene
+                    );
+                
+                var material = new BABYLON.StandardMaterial("material01", vis.scene);
+                material.ambientColor = new BABYLON.Color3(1,0,0);
+                box.material = material;
+            }
             box.position.x = thing.pos[0];
             box.position.z = thing.pos[1];
             box.position.y = 0;
             box.position.y += box.getBoundingInfo().boundingBox.extendSize.y;
             //box.position.y = 10;
             window.things[thing.id] = thing;
-            
-            var material = new BABYLON.StandardMaterial("material01", vis.scene);
-            material.ambientColor = new BABYLON.Color3(1,0,0);
-            box.material = material;
-            
         }
         
         function create_scene() {
             var vis = window.vis;
             vis.scene = new BABYLON.Scene(vis.engine);
+            var world = window.world;
             
             vis.radius = window.world.dims[0];
             if (window.world.dims[0] < window.world.dims[1]) {
@@ -107,6 +114,9 @@
             vis.camera.attachControl(vis.canvas, true);
             vis.camera.lowerRadiusLimit = 10;
             vis.camera.upperRadiusLimit = 3 * vis.radius;
+            // we prevent camera from going too low above ground
+            // (i.e. pi/2 is ground level, 0 is peak, here 0.01 is 1% above ground level)
+            vis.camera.upperBetaLimit = (Math.PI / 2) * (1 - 0.01);
             window.vis.camera.setTarget(new BABYLON.Vector3(window.world.dims[0]/2,0,window.world.dims[1]/2))
 
             // Add lights to the scene
@@ -130,9 +140,19 @@
             ground.material = material;
 
             // add visible axis
-            draw_axis([100,0,0], [1,0,0], 'axis-x');
-            draw_axis([0,100,0], [0,1,0], 'axis-y');
-            draw_axis([0,0,100], [0,0,1], 'axis-z');
+            draw_axis([world.dims[0],0,0], [1,0,0], 'axis-x');
+            draw_axis([0,world.dims[2],0], [0,1,0], 'axis-y');
+            draw_axis([0,0,world.dims[1]], [0,0,1], 'axis-z');
+            
+            vis.scene.registerBeforeRender(function () {
+            	// https://babylonjsguide.github.io/basics/Cameras
+                if (vis.camera.position.y < .5) {
+                    //var diff = 0 - camera.position.y;
+                    //camera.position.y = 1.5 + diff;
+                    // doesn't work too well, the user camera movement satys stuck to the limit for a while
+                    //vis.camera.setPosition(new BABYLON.Vector3(vis.camera.position.x,0.5,vis.camera.position.z));
+                }
+            });
 
             return vis.scene;
         }
@@ -189,7 +209,7 @@
         
         request_world();
         
-        //window.setInterval(request_world, 1000);
+        window.setInterval(request_world, 1000);
     });
    </script>
 {% endblock %}
