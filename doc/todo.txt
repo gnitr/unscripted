@@ -19,9 +19,12 @@ Phase 1
     [DONE] get world data with web api
     . improve the low perf, 50% cpu on i7 for an empty map is prohibitive
     [DONE] very basic visualisation of bots on world map
-    . add ability to move the camera (not just rotate and zoom)
-    . prevent camera to show reverse of ground
-    . click on a bot
+    . camera:
+        . add ability to move the camera (not just rotate and zoom)
+        . rotate camera around itself
+        . prevent camera to show reverse of ground
+        . remember the last camera settings
+    [DONE] click on a bot
     . better colors for ground
     . better colors for bots
     . update the positions

@@ -87,6 +87,11 @@
             box.position.y += box.getBoundingInfo().boundingBox.extendSize.y;
             //box.position.y = 10;
             window.things[thing.id] = thing;
+            
+            var material = new BABYLON.StandardMaterial("material01", vis.scene);
+            material.ambientColor = new BABYLON.Color3(1,0,0);
+            box.material = material;
+            
         }
         
         function create_scene() {
@@ -102,10 +107,14 @@
             vis.camera.attachControl(vis.canvas, true);
             vis.camera.lowerRadiusLimit = 10;
             vis.camera.upperRadiusLimit = 3 * vis.radius;
+            window.vis.camera.setTarget(new BABYLON.Vector3(window.world.dims[0]/2,0,window.world.dims[1]/2))
 
             // Add lights to the scene
-            var light1 = new BABYLON.HemisphericLight("daylight", new BABYLON.Vector3(1, 1, -1000), vis.scene);
-            //vis.scene.ambientColor = new BABYLON.Color3(0, 1, 1);
+            var light1 = new BABYLON.HemisphericLight("daylight", new BABYLON.Vector3(0.5, 1, 0.3), vis.scene);
+            light1.intensity = 0.7;
+            //light1.diffuse = new BABYLON.Color3(1, 1, 1);
+            //light1.groundColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+            vis.scene.ambientColor = new BABYLON.Color3(0.3, 0.3, 0.3);
             //var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), vis.scene);
 
             // Add and manipulate meshes in the scene
@@ -115,7 +124,11 @@
             ground.position.x =  ground.getBoundingInfo().boundingBox.extendSize.x;
             ground.position.y =  ground.getBoundingInfo().boundingBox.extendSize.y;
             ground.position.z =  ground.getBoundingInfo().boundingBox.extendSize.z;
-            
+
+            var material = new BABYLON.StandardMaterial("material01", vis.scene);
+            material.ambientColor = new BABYLON.Color3(0.5,0.5,0.5);
+            ground.material = material;
+
             // add visible axis
             draw_axis([100,0,0], [1,0,0], 'axis-x');
             draw_axis([0,100,0], [0,1,0], 'axis-y');
@@ -160,7 +173,7 @@
 
                     window.addEventListener("click", function (e) {
                         if (window.vis.scene) {
-                            var pick_info = window.vis.scene.pick(e.clientX, e.clientY);
+                            var pick_info = window.vis.scene.pick(window.vis.scene.pointerX, window.vis.scene.pointerY);
                             if (pick_info.hit) {
                                 var mesh = pick_info.pickedMesh;
                                 console.log(mesh.name);
