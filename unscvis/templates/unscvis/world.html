@@ -35,6 +35,7 @@
     <script>
     $(function(){
         window.world = {{ world.get_api_dict|json }};
+        window.things = {};
         window.vis = {
             canvas: null,
             context: null,
@@ -51,10 +52,33 @@
         
         function render_things(things) {
             var cx = get_canvas_context();
+            var vis = window.vis;
+            
+            $.each(things, function(i, thing) {
+                draw_thing(thing);
+            });
             //cx.fillStyle = '#000000';
             //ctx.fillRect(0,0,);
             //console.log(cx);
-            console.log(things);
+            //console.log(things);
+        }
+        
+        function draw_thing(thing) {
+            var vis = window.vis;
+            var box = BABYLON.MeshBuilder.CreateBox(
+                thing.id, 
+                {
+                    height: thing.dims[0],
+                    width: thing.dims[1],
+                    depth: thing.dims[1],
+                }, 
+                vis.scene
+            );
+            box.position.x = thing.pos[0];
+            box.position.y = thing.pos[1];
+            box.position.z = thing.pos[2];
+            box.position.y = 0;
+            window.things[thing.id] = thing;
         }
         
         function create_scene() {
@@ -66,16 +90,20 @@
                 vis.radius = window.world.dims[1];
             }
             
-            vis.camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2, vis.radius * 2, BABYLON.Vector3.Zero(), vis.scene);
+            vis.camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 4, vis.radius * 2, BABYLON.Vector3.Zero(), vis.scene);
             vis.camera.attachControl(vis.canvas, true);
+            vis.camera.lowerRadiusLimit = 10;
+            vis.camera.upperRadiusLimit = 3 * vis.radius;
 
             // Add lights to the scene
-            var light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), vis.scene);
-            var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), vis.scene);
+            var light1 = new BABYLON.HemisphericLight("daylight", new BABYLON.Vector3(1, 1, -1000), vis.scene);
+            //vis.scene.ambientColor = new BABYLON.Color3(0, 1, 1);
+            //var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), vis.scene);
 
             // Add and manipulate meshes in the scene
             //var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:2}, vis.scene);
-            var map = BABYLON.MeshBuilder.CreatePlane("map", {width: window.world.dims[0], height: window.world.dims[1]}, vis.scene);
+            //var plane = BABYLON.MeshBuilder.CreatePlane("map", {width: window.world.dims[0], height: window.world.dims[1]}, vis.scene);
+            var ground = BABYLON.MeshBuilder.CreateGround("ground", {width: window.world.dims[0], height: window.world.dims[1], subdivisions: 4}, vis.scene);
 
             return vis.scene;
         }

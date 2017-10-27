@@ -15,8 +15,9 @@ Phase 1
     . move bot              POST /things/Y/actions/walk/X?angle=0.3
     [DONE] change parentid to objectid 
 . Crude visualisation
-    [done] web page
-    [] get world data with web api
+    [DONE] web page
+    [DONE] get world data with web api
+    . improve the low perf, 50% cpu on i7 for an empty map is prohibitive
     [] very basic visualisation of bots on world map
 . 
 () Command line tool that reflects Web API
