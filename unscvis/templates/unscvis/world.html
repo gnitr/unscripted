@@ -14,11 +14,17 @@
             width: 100%;
             height: 100%;
         }
+        
+        #info-box {
+        }
+        
     </style>
 {% endblock %}
 
 {% block content %}
     <div id="vis-container">
+    </div>
+    <div id="info-box">
     </div>
 {% endblock %}
 
@@ -68,16 +74,18 @@
             var box = BABYLON.MeshBuilder.CreateBox(
                 thing.id, 
                 {
-                    height: thing.dims[0],
-                    width: thing.dims[1],
+                    width: thing.dims[0],
                     depth: thing.dims[1],
+                    height: thing.dims[2],
+                    //height: 20,
                 }, 
                 vis.scene
             );
             box.position.x = thing.pos[0];
-            box.position.y = thing.pos[1];
-            box.position.z = thing.pos[2];
+            box.position.z = thing.pos[1];
             box.position.y = 0;
+            box.position.y += box.getBoundingInfo().boundingBox.extendSize.y;
+            //box.position.y = 10;
             window.things[thing.id] = thing;
         }
         
@@ -104,8 +112,23 @@
             //var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:2}, vis.scene);
             //var plane = BABYLON.MeshBuilder.CreatePlane("map", {width: window.world.dims[0], height: window.world.dims[1]}, vis.scene);
             var ground = BABYLON.MeshBuilder.CreateGround("ground", {width: window.world.dims[0], height: window.world.dims[1], subdivisions: 4}, vis.scene);
+            ground.position.x =  ground.getBoundingInfo().boundingBox.extendSize.x;
+            ground.position.y =  ground.getBoundingInfo().boundingBox.extendSize.y;
+            ground.position.z =  ground.getBoundingInfo().boundingBox.extendSize.z;
+            
+            // add visible axis
+            draw_axis([100,0,0], [1,0,0], 'axis-x');
+            draw_axis([0,100,0], [0,1,0], 'axis-y');
+            draw_axis([0,0,100], [0,0,1], 'axis-z');
 
             return vis.scene;
+        }
+
+        function draw_axis(dir, color, name) {
+            var points;
+            points = [new BABYLON.Vector3(0,0,0), new BABYLON.Vector3(dir[0], dir[1], dir[2])];
+            var line = BABYLON.MeshBuilder.CreateLines(name, {points: points}, vis.scene);
+            line.color = new BABYLON.Color3(color[0], color[1], color[2]);
         }
 
         function get_canvas_context() {
@@ -133,6 +156,17 @@
 
                     window.addEventListener("resize", function () {
                         vis.engine.resize();
+                    });
+
+                    window.addEventListener("click", function (e) {
+                        if (window.vis.scene) {
+                            var pick_info = window.vis.scene.pick(e.clientX, e.clientY);
+                            if (pick_info.hit) {
+                                var mesh = pick_info.pickedMesh;
+                                console.log(mesh.name);
+                                console.log(mesh);
+                            }
+                        }
                     });
                 }
                 vis.context = ret;
