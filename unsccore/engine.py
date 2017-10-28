@@ -25,4 +25,4 @@ class WorldEngine(object):
         ret = [thing.get_api_dict() for thing in Thing.objects.filter(rootid=actor.rootid)]
         
         return ret
-        
+    

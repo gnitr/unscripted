@@ -102,6 +102,8 @@
                 var material = new BABYLON.StandardMaterial("material01", vis.scene);
                 material.ambientColor = new BABYLON.Color3(1,0,0);
                 box.material = material;
+                
+                init_on_click_mesh(box);
             }
             box.position.x = thing.pos[0];
             box.position.y = thing.pos[1];
@@ -110,6 +112,19 @@
             //box.position.y = 10;
             window.things[thing.id] = thing;
             thing.draw_cycle = vis.draw_cycle;
+        }
+        
+        function init_on_click_mesh(mesh) {
+            mesh.actionManager = new BABYLON.ActionManager(vis.scene);
+            mesh.actionManager.registerAction(
+                new BABYLON.ExecuteCodeAction(
+                    BABYLON.ActionManager.OnPickTrigger, 
+                    function () {
+                        window.vis.camera_target = mesh;
+                        console.log(mesh.name);
+                    }
+                )
+            );
         }
         
         function create_scene() {
@@ -146,6 +161,8 @@
             ground.position.x =  ground.getBoundingInfo().boundingBox.extendSize.x;
             ground.position.y =  ground.getBoundingInfo().boundingBox.extendSize.y;
             ground.position.z =  ground.getBoundingInfo().boundingBox.extendSize.z;
+            vis.camera_target = ground;
+            init_on_click_mesh(ground);
 
             var material = new BABYLON.StandardMaterial("material01", vis.scene);
             material.ambientColor = new BABYLON.Color3(0.5,0.5,0.5);
@@ -159,6 +176,9 @@
             vis.scene.registerBeforeRender(function () {
                 // https://babylonjsguide.github.io/basics/Cameras
                 var vis = window.vis;
+            
+                var mesh = vis.camera_target;
+                window.vis.camera.setTarget(new BABYLON.Vector3(mesh.position.x,0,mesh.position.z));
             	
                 if (vis.camera.position.y < .5) {
                     //var diff = 0 - camera.position.y;
@@ -205,14 +225,6 @@
                         vis.engine.resize();
                     });
                     
-                    vis.actionManager = new BABYLON.ActionManager(vis.scene);
-                    vis.actionManager.registerAction(
-                        new BABYLON.ExecuteCodeAction(
-                            BABYLON.ActionManager.OnPickTrigger, 
-                            function () {console.log('ACTION')}
-                            )
-                        );
-
                     window.addEventListener("click2", function (e) {
                         if (window.vis.scene) {
                             var pick_info = window.vis.scene.pick(window.vis.scene.pointerX, window.vis.scene.pointerY);

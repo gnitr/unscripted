@@ -94,14 +94,65 @@ class Thing(mogels.MongoDocumentModule):
     def _before_inserting_child(self, child):
         raise ThingParentError('Y refuses insertion of child X')
 
+    def get_children(self):
+        return Thing.objects.filter(parentid=self.pk)
+
+    def empty(self):
+        return self.delete_children()
+
+    def delete_children(self):
+        for thing in self.get_children():
+            thing.delete()
+    
     def delete(self):
         # A in B in C
         # Delete B
         # => A in C
         # TODO: deal with children and parents
+        self.delete_children()
         
         super(Thing, self).delete()
 
     def add_thing(self, thing):
         thing.parentid = self.pk
         thing.save()
+    
+    def get_bounding_box(self):
+        ret = [[], []]
+        
+        ret[0] = [self.pos[0] - self.dims[0] / 2, self.pos[1], self.pos[2] - self.dims[2] / 2]
+        ret[1] = [self.pos[0] + self.dims[0] / 2, self.pos[1] + self.dims[1], self.pos[2] + self.dims[2] / 2]
+        
+        return ret
+
+    def is_position_valid(self, cache=None):
+        ret = False
+        obstructing_things = self.get_obstructing_things(cache, True)
+        
+        if not obstructing_things:
+            parent = self.parent
+            min0, max0 = self.get_bounding_box()
+            min1, max1 = parent.get_bounding_box()
+            if (min1[0] < min0[0] and min1[2] < min0[2] and max1[0] > max0[0] and max1[2] > max0[2]):
+                ret = True
+                
+        return ret
+
+    def get_obstructing_things(self, cache=None, first_only=False):
+        ret = []
+        # TODO: optimse this! And don't fetch everything from DB!
+        min0, max0 = self.get_bounding_box()
+        if cache is None:
+            cache = []
+        if not cache:
+            cache[:] = Thing.objects.filter(parentid=self.parentid)
+        for athing in cache:
+            if athing.pk == self.pk: continue
+            min1, max1 = athing.get_bounding_box()
+            if not (min0[0] > max1[0] or min0[2] > max1[2] or min1[0] > max0[0] or min1[2] > max0[2]):
+                 ret.append(athing)
+                 if first_only:
+                     break
+                 
+        return ret
+    
