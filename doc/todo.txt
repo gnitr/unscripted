@@ -12,9 +12,9 @@ Phase 1
     [DONE] remove a world        DEL /worlds/X
     [DONE] create a bot          POST /worlds/X/bots
     [DONE] things in a world     GET /worlds/X/things
-    . move bot              POST /things/Y/actions/walk/X?angle=0.3
+    [DONE] move bot              POST /things/Y/actions/walk/X?angle=0.3
     [DONE] change parentid to objectid
-    . use y has real height from ground 
+    [DONE] use y has real height from ground 
 . Crude visualisation
     [DONE] web page
     [DONE] get world data with web api
@@ -30,14 +30,19 @@ Phase 1
     . better colors for ground
     [DONE] better colors for bots
     [DONE] update the positions
-. 
 () Command line tool that reflects Web API
     . ucore
     . create-POST, read-GET, update-PUT, rm-DELETE
 [DONE] System for consistent IDs across the different layers:
     . Mongo doc._id (ObjectId) <-> Thing.pk (str) <-> api item.id (str)
+. basic world engine
+    [DONE] forward actions to targets
+    . implement walk
+    . make sure position is valid (not outside world boundary or colliding with something else)
 . remote bot
-    . simple command to execute action every x seconds
+    [DONE] simple command to execute action every x seconds
+    [DONE] random walk
+    . 
 . release online
     . pb with domain config on web hosting side, site still links to godaddy
     

@@ -1,5 +1,6 @@
 from .thing import Thing, ThingParentError
 from random import random
+import math
 
 class World(Thing):
     '''
@@ -17,7 +18,12 @@ class World(Thing):
         super(World, self).__init__(**defaults)
     
     def walk(self, actor, angle=0.0):
-        actor.move(angle=angle)
+        step_size = 0.5
+        newpos = actor.pos
+        angle_radian = float(angle) * math.pi * 2
+        actor.pos[0] = actor.pos[0] + math.cos(angle_radian) * step_size
+        actor.pos[2] = actor.pos[2] + math.sin(angle_radian) * step_size
+        actor.save()
 
     def get_random_pos(self):
         return [random() * self.dims[0], 0, random() * self.dims[2]]

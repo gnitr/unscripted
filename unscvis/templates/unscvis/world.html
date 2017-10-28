@@ -52,7 +52,8 @@
             engine: null,
             scene: null,
             camera: null,
-            draw_cycle: 0
+            draw_cycle: 0,
+            camera_target: null,
         };
       
         function request_world() {
@@ -156,7 +157,9 @@
             draw_axis([0,0,world.dims[2]], [0,0,1], 'axis-z');
             
             vis.scene.registerBeforeRender(function () {
-            	// https://babylonjsguide.github.io/basics/Cameras
+                // https://babylonjsguide.github.io/basics/Cameras
+                var vis = window.vis;
+            	
                 if (vis.camera.position.y < .5) {
                     //var diff = 0 - camera.position.y;
                     //camera.position.y = 1.5 + diff;
@@ -201,14 +204,25 @@
                     window.addEventListener("resize", function () {
                         vis.engine.resize();
                     });
+                    
+                    vis.actionManager = new BABYLON.ActionManager(vis.scene);
+                    vis.actionManager.registerAction(
+                        new BABYLON.ExecuteCodeAction(
+                            BABYLON.ActionManager.OnPickTrigger, 
+                            function () {console.log('ACTION')}
+                            )
+                        );
 
-                    window.addEventListener("click", function (e) {
+                    window.addEventListener("click2", function (e) {
                         if (window.vis.scene) {
                             var pick_info = window.vis.scene.pick(window.vis.scene.pointerX, window.vis.scene.pointerY);
                             if (pick_info.hit) {
+                                var vis = window.vis;
                                 var mesh = pick_info.pickedMesh;
                                 console.log(mesh.name);
                                 console.log(mesh);
+
+                                vis.camera.setTarget(new BABYLON.Vector3(mesh.position.x,0,mesh.position.z));
                             }
                         }
                     });

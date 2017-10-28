@@ -102,11 +102,14 @@ class UnscriptedAPI(object):
             
             if resource_type == 'action':
                 # TODO: test len
+                # TODO: change to POST only
                 action = parts.pop(0)
                 from .engine import WorldEngine
                 engine = WorldEngine()
                 api_method = 'thing.action.%s' % action
-                data_items = engine.action(actorid=parentid, action=action, **self.request.GET)
+                # seems useless, but actually needed b/c GET is a list of lists
+                params = {k:v for k, v in self.request.GET.iteritems()}
+                data_items = engine.action(actorid=parentid, action=action, **params)
             else:
                 module = self.get_singular(resource_type)
                 athing = Thing.new(module=module, parentid=parentid)

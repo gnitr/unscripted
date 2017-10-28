@@ -50,9 +50,6 @@ class Thing(mogels.MongoDocumentModule):
         ret['parentid'] = ObjectId(self.parentid) if self.parentid else None
         return ret
     
-    def move(self):
-        pass
-    
     @classmethod
     def get_objects(cls):
         ret = super(Thing, cls).get_objects()
