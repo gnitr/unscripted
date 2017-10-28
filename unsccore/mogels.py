@@ -278,15 +278,27 @@ class MongoDocumentModule(MongoModel):
         # TODO: error management!
         import importlib
         module_key = doc.get('module', None)
+        aclass = cls.get_class_from_module_key(module_key)
+        if aclass:
+            ret = aclass(**doc)
+        else:
+            ret = super(MongoDocumentModule, cls).new(**doc)
+        
+        return ret
+    
+    @classmethod
+    def get_class_from_module_key(cls, module_key):
+        ret = None
+
         if module_key:
+            import importlib
             try:
                 module = importlib.import_module('.'+module_key, 'unsccore.things')
+                ret = getattr(module, get_class_name_from_module_key(module_key), None)
             except ImportError:
-                return None
-            doc_class = getattr(module, get_class_name_from_module_key(module_key), None)
-            return doc_class(**doc)
-        return super(MongoDocumentModule, cls).new(**doc)
-            
+                pass
+        
+        return ret
     
     @classmethod
     def get_objects(cls):

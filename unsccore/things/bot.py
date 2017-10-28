@@ -8,7 +8,7 @@ class Bot(Thing):
     def __init__(self, **kwargs):
         # last valid parentid value
         defaults = {
-            'dims': (0.5, 0.3, 1.7),
+            'dims': (0.5, 1.7, 0.3),
         }
         defaults.update(kwargs)
         super(Bot, self).__init__(**defaults)

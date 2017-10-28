@@ -23,7 +23,8 @@ class Thing(mogels.MongoDocumentModule):
         defaults = {
             'pos': [0.0] * 3,
             'dims': [1.0] * 3,
-            'parentid': None
+            'parentid': None,
+            'rootid': None,
         }
         defaults.update(kwargs)
         super(Thing, self).__init__(**defaults)
@@ -70,16 +71,26 @@ class Thing(mogels.MongoDocumentModule):
     parent = property(get_parent, set_parent)
     
     def save(self):
-        
         if self.parentid != self._parentid_valid:
             self._before_changing_parent()
         
         super(Thing, self).save()
+        
+        if self.rootid is None:
+            # a new root/world is created, we need to set its .rootid = .id
+            self.rootid = self.pk
+            # and save again
+            super(Thing, self).save()
+        
         self._parentid_valid = self.parentid
         
     def _before_changing_parent(self):
         if self.parentid:
-            self.parent._before_inserting_child(self)
+            parent = self.parent
+            parent._before_inserting_child(self)
+            
+            self.rootid = parent.rootid
+                
         if self.__class__ == Thing:
             raise ThingParentError('Generic Things cannot be added. Please add specific things.')
     

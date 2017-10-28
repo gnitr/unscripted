@@ -1,3 +1,4 @@
 Django==1.11.6
-djangorestframework==3.7.1
+#djangorestframework==3.7.1
 pymongo==3.5.1
+requests==2.18.4

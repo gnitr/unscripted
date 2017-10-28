@@ -40,7 +40,6 @@ INSTALLED_APPS = [
 ]
 
 INSTALLED_APPS += [
-    'rest_framework',
     'unsccore.apps.UnsccoreConfig',
     'unscbot.apps.UnscbotConfig',
     'unscvis.apps.UnscvisConfig'

@@ -36,6 +36,8 @@ Phase 1
     . create-POST, read-GET, update-PUT, rm-DELETE
 [DONE] System for consistent IDs across the different layers:
     . Mongo doc._id (ObjectId) <-> Thing.pk (str) <-> api item.id (str)
+. remote bot
+    . simple command to execute action every x seconds
 . release online
     . pb with domain config on web hosting side, site still links to godaddy
     

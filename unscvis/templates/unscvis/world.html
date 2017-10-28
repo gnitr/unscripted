@@ -51,7 +51,8 @@
             context: null,
             engine: null,
             scene: null,
-            camera: null
+            camera: null,
+            draw_cycle: 0
         };
       
         function request_world() {
@@ -64,13 +65,22 @@
             var cx = get_canvas_context();
             var vis = window.vis;
             
+            vis.draw_cycle += 1;
+            if (vis.draw_cycle > 1) vis.draw_cycle = 0;
+            
+            // add/update things on scene
             $.each(things, function(i, thing) {
                 draw_thing(thing);
             });
-            //cx.fillStyle = '#000000';
-            //ctx.fillRect(0,0,);
-            //console.log(cx);
-            //console.log(things);
+            
+            // remove things from scene
+            $.each(window.things, function(i, thing) {
+                if (thing.draw_cycle != vis.draw_cycle) {
+                    var mesh = vis.scene.getMeshByName(thing.id);
+                    mesh.dispose();
+                    delete window.things[thing.id];
+                }
+            });
         }
         
         function draw_thing(thing) {
@@ -79,11 +89,11 @@
             var box = vis.scene.getMeshByName(thing.id);
             if (!box) {
                 box = BABYLON.MeshBuilder.CreateBox(
-                        thing.id, 
+                        thing.id,
                         {
                             width: thing.dims[0],
-                            depth: thing.dims[1],
-                            height: thing.dims[2],
+                            height: thing.dims[1],
+                            depth: thing.dims[2],
                         }, 
                         vis.scene
                     );
@@ -93,11 +103,12 @@
                 box.material = material;
             }
             box.position.x = thing.pos[0];
-            box.position.z = thing.pos[1];
-            box.position.y = 0;
+            box.position.y = thing.pos[1];
+            box.position.z = thing.pos[2];
             box.position.y += box.getBoundingInfo().boundingBox.extendSize.y;
             //box.position.y = 10;
             window.things[thing.id] = thing;
+            thing.draw_cycle = vis.draw_cycle;
         }
         
         function create_scene() {
@@ -130,7 +141,7 @@
             // Add and manipulate meshes in the scene
             //var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:2}, vis.scene);
             //var plane = BABYLON.MeshBuilder.CreatePlane("map", {width: window.world.dims[0], height: window.world.dims[1]}, vis.scene);
-            var ground = BABYLON.MeshBuilder.CreateGround("ground", {width: window.world.dims[0], height: window.world.dims[1], subdivisions: 4}, vis.scene);
+            var ground = BABYLON.MeshBuilder.CreateGround("ground", {width: window.world.dims[0], height: window.world.dims[2], subdivisions: 4}, vis.scene);
             ground.position.x =  ground.getBoundingInfo().boundingBox.extendSize.x;
             ground.position.y =  ground.getBoundingInfo().boundingBox.extendSize.y;
             ground.position.z =  ground.getBoundingInfo().boundingBox.extendSize.z;
@@ -141,8 +152,8 @@
 
             // add visible axis
             draw_axis([world.dims[0],0,0], [1,0,0], 'axis-x');
-            draw_axis([0,world.dims[2],0], [0,1,0], 'axis-y');
-            draw_axis([0,0,world.dims[1]], [0,0,1], 'axis-z');
+            draw_axis([0,world.dims[1],0], [0,1,0], 'axis-y');
+            draw_axis([0,0,world.dims[2]], [0,0,1], 'axis-z');
             
             vis.scene.registerBeforeRender(function () {
             	// https://babylonjsguide.github.io/basics/Cameras

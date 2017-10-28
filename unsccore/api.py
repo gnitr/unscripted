@@ -76,6 +76,7 @@ class UnscriptedAPI(object):
         
         self.response['method'] = ''
         api_method = None
+        data_items = []
         data = {}
         
         if len(parts) < 1:
@@ -96,8 +97,19 @@ class UnscriptedAPI(object):
                 parentid = parts.pop(0)
 
             resource_type = parts.pop(0)
-            module = self.get_singular(resource_type)
-            athing = Thing.new(module=module, parentid=parentid)
+            
+            athing = None
+            
+            if resource_type == 'action':
+                # TODO: test len
+                action = parts.pop(0)
+                from .engine import WorldEngine
+                engine = WorldEngine()
+                api_method = 'thing.action.%s' % action
+                data_items = engine.action(actorid=parentid, action=action, **self.request.GET)
+            else:
+                module = self.get_singular(resource_type)
+                athing = Thing.new(module=module, parentid=parentid)
             
             if athing:
                 thingid = parts.pop(0) if parts else None
@@ -141,13 +153,15 @@ class UnscriptedAPI(object):
                     
                 # TODO: if ask for one return Thing in the data, not as a list
                 #data['count'] = things.count()
-                data['total_count'] = data['count'] = 0
-                data['items'] = [self.get_json_data_from_thing(thing) for thing in things]
-                data['count'] = len(data['items'])
-                data['total_count'] = data['count']
+                data_items = [self.get_json_data_from_thing(thing) for thing in things]
                 
         
         if api_method:
+            data['total_count'] = data['count'] = 0
+            data['items'] = data_items
+            data['count'] = len(data['items'])
+            data['total_count'] = data['count']
+            
             self.response['method'] = api_method
             self.response['data'] = data
         else:
