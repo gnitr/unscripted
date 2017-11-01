@@ -57,33 +57,34 @@ Main components:
 
 # Road map
 
-## Phase 1: Skeleton architecture (In progress, started Oct 2017)
+## 0.1: Skeleton architecture (started Oct 2017, complete, to be documented)
 
 * empty world (a 2D square with bots only)
 * 2D grid rendering in a web page
 * basic world engine running in the background
 * dumb bot: random walk, nothing else
 * run bot as a background process
-* Web API
+* Web API and distributed architecture
 
-## Phase 2: Interaction with objects
+## 0.2: Interaction with objects
 
 * create a few world objects and implement the way bots can interract with them
+* bots are still dumb (random actions or scripted in order to test the framework)
 
-## Phase 3: Needs for resources and survival
+## 0.3: Needs for resources and survival
 
 * introduce resources that the bots can consume (water, food, shelter, temperature, ...)
 * they experience sensations when they need or misuse resources (hunger, cold, ...)
 * bots can die due to unfulfilled needs 
 * new bots replace dead ones
 
-## Phase 4: Reproduction and inheritence
+## 0.4: Reproduction and inheritence
 
 * bots can reproduce
 * bots can inherit from parents
 * bots should define the genetic material of their mind (i.e. enough information to build a new mind, info can be mutated and combined with others)
 
-## Phase 5 and beyond: TBC
+## 0.5 and beyond: TBC
 * communication
 * ...
 
@@ -113,6 +114,8 @@ I have thought about this a long time ago and never had the time or chance to do
 Reinforcement in Unscripted will be different. The World will give feedback to the bots but they will be rare. Primary feedbacks will be pain or pleasure or something similar for some actions only. The idea is to let the bot derive and create their own reward and value system around those. The ideal would be to have the most minimal reward system for bots to bootstrap their goal-driven behaviour and intellectual evolution but let them extend and even override that reward system based on their own experience. This could raise many interesting questions about behaviour, ethics, etc. This needs much more thoughts but one possibility would be to implement a multichannel sensory system. Basically the world sends a sensation with a certain intensity and a channel ID. The bot can learn to associate the sensation with pain or pleasure and alter the intensity, i.e. r = k * s (reward = (a learned factor) * world-supplied-sensation). k can be negative or positive.
 
 * **WestWorld**: a movie and a TV series about a theme park populated by ultra-realistic bots. Unscripted is similar in the sense that we provide a world with human-like bots where naratives are important. What's different in Unscripted: bots are not 'coded'; the narratives are not scripted; the artificial world is virtual, much simpler than reality and not-photorealistic; humans may enter the world but their 'body', characteristics and privileges will be identical to bots, only the mind will differ; bots can reproduce; they are born babies and have a single but full life.
+
+"I would sometimes look at the side characters in those movies, hanging out by the saloon doors, or crossing the street, or working on a railroad, and think, Well, actually, that’s kind of more like who I would have been in the Old West. I wonder what their story is. To do it together in this show allowed us to explore all those stories. . . . That was irresistible to me." - Lisa Joy (interviewd by The New Yorker)
 
 # Open questions
 

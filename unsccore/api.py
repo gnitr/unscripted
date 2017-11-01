@@ -100,7 +100,7 @@ class UnscriptedAPI(object):
             
             athing = None
             
-            if resource_type == 'action':
+            if resource_type == 'actions':
                 # TODO: test len
                 # TODO: change to POST only
                 action = parts.pop(0)

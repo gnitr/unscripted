@@ -138,10 +138,15 @@ class Thing(mogels.MongoDocumentModule):
                 
         return ret
 
-    def get_obstructing_things(self, cache=None, first_only=False):
+    def get_obstructing_things(self, cache=None, first_only=False, gap=0.0):
         ret = []
         # TODO: optimse this! And don't fetch everything from DB!
         min0, max0 = self.get_bounding_box()
+        if gap:
+            min0[0] -= gap
+            min0[1] -= gap
+            max0[0] += gap
+            max0[1] += gap
         if cache is None:
             cache = []
         if not cache:
@@ -154,5 +159,21 @@ class Thing(mogels.MongoDocumentModule):
                  if first_only:
                      break
                  
+        return ret
+    
+    def get_api_dict(self):
+        import inspect
+        ret = super(Thing, self).get_api_dict()
+        
+        ret['actions'] = []
+        for method_name in dir(self):
+            method = getattr(self, method_name)
+            if inspect.ismethod(method):
+                margs = inspect.getargspec(method)
+                if len(margs) > 1 and margs.args[0:2] == ['self', 'actor']:
+                    action = {k: 0.0 for k in margs.args[2:]}
+                    action['action'] = method_name
+                    ret['actions'].append(action)
+        
         return ret
     

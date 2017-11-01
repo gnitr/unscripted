@@ -1,3 +1,6 @@
+! see in a range
+! act in a narrower range
+
 Phase 1
 
 [DONE] Django project and apps skeletons

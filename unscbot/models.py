@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from random import random
+from random import random, randint
 import requests
 import json
 
@@ -23,18 +23,37 @@ class Bot(object):
         else:
             import time
             while True:
-                self.interact(action='walk', target=self.world['id'], angle=random())
+                #self.interact(action='walk', target=self.world['id'], angle=random())
+                self.select_action()
+                self.call_selected_action()
                 time.sleep(.01)
         
         return ret
     
+    def select_action(self):
+        actions = [{'action': 'pass'}]
+        for item in self.items:
+            for action in item.get('actions', []):
+                action['target'] = item['id']
+                actions.append(action)
+        # select random action
+        self.action = actions[randint(0, len(actions) - 1)]
+        # select arguments
+        for k in self.action.keys():
+            if k not in ['action', 'target']:
+                self.action[k] = random()
+        return self.action
+    
+    def call_selected_action(self):
+        self.interact(**self.action)
+
     def interact(self, action, **kwargs):
         ret = False
         
         # https://stackoverflow.com/questions/17301938/making-a-request-to-a-restful-api-using-python
         import urllib
         qs = urllib.urlencode(kwargs)
-        url = 'http://localhost:8000/api/1/bots/%s/action/%s?%s' % (self.botid, action, qs)
+        url = 'http://localhost:8000/api/1/bots/%s/actions/%s?%s' % (self.botid, action, qs)
         print url
         
         res = None
