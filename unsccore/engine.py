@@ -1,5 +1,8 @@
 from unsccore.things.thing import Thing
 
+vision_radius = 50.0
+action_radius = 1
+
 class EngineError(Exception):
     pass
 
@@ -16,17 +19,21 @@ class WorldEngine(object):
             actor = Thing.objects.get(pk=actorid)
         
         if target:
-            action_method = getattr(target, action, None)
-            if action_method:
-                action_method(actor=actor, **kwargs)
+            targets = actor.get_obstructing_things(cache=[target], gap=action_radius)
+            if targets:
+                action_method = getattr(target, action, None)
+                if action_method:
+                    action_method(actor=actor, **kwargs)
+                else:
+                    raise EngineError('Unknown action "%s"' % action)
             else:
-                raise EngineError('Unknown action "%s"' % action)
+                print 'Not within reach'
+                pass
         
             # Get all the things near actor
             # TODO: optimise!
             cache = []
-            vision_radius = 50.0
-            ret = actor.get_obstructing_things(cache=cache, first_only=False, gap=vision_radius)
+            ret = actor.get_obstructing_things(cache=cache, gap=vision_radius)
             
             ret.append(Thing.objects.get(pk=actor.rootid))
         
