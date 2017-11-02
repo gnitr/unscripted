@@ -13,3 +13,5 @@ class Bot(Thing):
         defaults.update(kwargs)
         super(Bot, self).__init__(**defaults)
         
+    def observe(self, actor):
+        pass

@@ -10,6 +10,8 @@
   * build an open framework rather than a proprietary algorithm
 * **Status**: Development of phase 1 just started (see 'roadmap' section below)
 
+Copyright (c) 2017 Artilligence Ltd
+
 ## About me
 
 I have some background in software engineering, a bit in AI and film studies. If anything here inspires you or tickle your interest please feel free to contact me via github. Unfortunately I can only work on this in my spare time. I've had this idea for more than 15 years but never had a chance to do anything practical about it! Read more about [my perspectives on AI](https://github.com/goffer-looney/unscripted/wiki/Personal-Vision-&-Beliefs).

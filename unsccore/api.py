@@ -109,7 +109,7 @@ class UnscriptedAPI(object):
                 api_method = 'thing.action.%s' % action
                 # seems useless, but actually needed b/c GET is a list of lists
                 params = {k:v for k, v in self.request.GET.iteritems()}
-                data_items = engine.action(actorid=parentid, action=action, **params)
+                things = engine.action(targetid=parentid, action=action, **params)
             else:
                 module = self.get_singular(resource_type)
                 athing = Thing.new(module=module, parentid=parentid)
@@ -155,8 +155,8 @@ class UnscriptedAPI(object):
                     things = []
                     
                 # TODO: if ask for one return Thing in the data, not as a list
-                #data['count'] = things.count()
-                data_items = [self.get_json_data_from_thing(thing) for thing in things]
+            
+            data_items = [self.get_json_data_from_thing(thing) for thing in things]
                 
         
         if api_method:

@@ -5,29 +5,30 @@ class EngineError(Exception):
 
 class WorldEngine(object):
     
-    def action(self, actorid, action, **kwargs):
+    def action(self, targetid, action, **kwargs):
         ret = []
         
-        actor = Thing.objects.get(pk=actorid)
+        target = Thing.objects.get(pk=targetid)
+        actor = target
+        actorid = kwargs.get('actorid', None)
+        if actorid:
+            del kwargs['actorid']
+            actor = Thing.objects.get(pk=actorid)
         
-        targetid = kwargs.get('target', None)
-        if targetid:
-            del kwargs['target']
-            target = Thing.objects.get(pk=targetid)
+        if target:
             action_method = getattr(target, action, None)
             if action_method:
                 action_method(actor=actor, **kwargs)
             else:
                 raise EngineError('Unknown action "%s"' % action)
         
-        # Get all the things near actor
-        # TODO: optimise!
-        ret = actor.get_obstructing_things(cache=None, first_only=False, gap=1.0)
-        ret.append(Thing.objects.get(pk=actor.rootid))
-        ret = [
-            thing.get_api_dict()
-            for thing in ret
-        ] 
+            # Get all the things near actor
+            # TODO: optimise!
+            cache = []
+            vision_radius = 50.0
+            ret = actor.get_obstructing_things(cache=cache, first_only=False, gap=vision_radius)
+            
+            ret.append(Thing.objects.get(pk=actor.rootid))
         
         return ret
     
