@@ -19,16 +19,17 @@ class WorldEngine(object):
             actor = Thing.objects.get(pk=actorid)
         
         if target:
-            targets = actor.get_obstructing_things(cache=[target], gap=action_radius)
-            if targets:
+            if action not in ['pass']:
                 action_method = getattr(target, action, None)
                 if action_method:
-                    action_method(actor=actor, **kwargs)
+                    targets = actor.get_obstructing_things(cache=[target], gap=action_radius)
+                    if targets:
+                        action_method(actor=actor, **kwargs)
+                    else:
+                        print 'Not within reach'
+                        pass
                 else:
                     raise EngineError('Unknown action "%s"' % action)
-            else:
-                print 'Not within reach'
-                pass
         
             # Get all the things near actor
             # TODO: optimise!

@@ -14,7 +14,7 @@ class Bot(object):
         self.items = []
         
     def initialise(self):
-        return self.interact(action='observe')
+        return self.interact(action='pass')
         
     def live(self):
         ret = self.initialise()
@@ -32,7 +32,7 @@ class Bot(object):
         return ret
     
     def select_action(self):
-        actions = [{'action': 'observe'}]
+        actions = [{'action': 'pass'}]
         for item in self.items:
             for action in item.get('actions', []):
                 action['targetid'] = item['id']

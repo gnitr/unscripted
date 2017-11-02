@@ -26,7 +26,6 @@ class World(Thing):
         actor.pos[0] = pos[0] + math.cos(angle_radian) * step_size
         actor.pos[2] = pos[2] + math.sin(angle_radian) * step_size
         
-        print 'HERE'
         if actor.is_position_valid():
             actor.save()
         else:
