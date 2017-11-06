@@ -4,11 +4,12 @@
 * **Primary Objective**: encourage creation of artificial general intelligent agents (0 prior knowledge about world, no training data, general purpose, 100% algorithmically controlled)
 * **Secondary**: Let's see what happens when we let bots live their own life, reproduce, survive, thrive and create their own stories.
 * **Focus**: 
-  * unscripted behaviour rather than high level intelligence and optimal solution solving, 
-  * life-long and generational evolutions rather than adult-born bots, 
-  * human-like situations, psychological, social and behavioural emphasis rather than low-level sensory input processing, 
+  * unscripted behaviour rather than high level intelligence and optimal solution solving
+  * life-long and generational evolutions rather than adult-born bots
+  * human-like situations, psychological, social and behavioural emphasis rather than low-level sensory input processing
+  * emphasis on the development of the mind rather than detailed body and physical interactions with world
   * build an open framework rather than a proprietary algorithm
-* **Status**: Development of phase 1 just started (see 'roadmap' section below)
+* **Status**: Phase 1 is complete. Phase 2 planned for November 2017 (see 'roadmap' section below)
 
 Copyright (c) 2017 Artilligence Ltd 
 
