@@ -10,7 +10,7 @@
   * build an open framework rather than a proprietary algorithm
 * **Status**: Development of phase 1 just started (see 'roadmap' section below)
 
-Copyright (c) 2017 Artilligence Ltd [About us](/gnitr/unscripted/wiki/aboutus)
+Copyright (c) 2017 Artilligence Ltd [About us](/gnitr/unscripted/wiki/About-Us)
 
 ## Why?
 Have you ever watched a film, read a book, played an adventure or RPG game and got really immersed into that world but left wanting for more? You enjoyed the quests, the backstories, the characters, the turn of events, ... but you often noticed that it is all scripted. It is a limited construct authored by humans. They let you glimpse at their fabricated world. You only see and experience the narrative paths designed for you. You have limited choices among pre-written dialogues, cut-off scenes. 
