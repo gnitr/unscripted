@@ -8,7 +8,9 @@
   * life-long and generational evolutions rather than adult-born bots
   * human-like situations, psychological, social and behavioural emphasis rather than low-level sensory input processing
   * emphasis on the development of the mind rather than detailed body and physical interactions with world
-  * build an open framework rather than a proprietary algorithm
+  * building an open framework rather than a proprietary algorithm
+  * hoping to provoke new questions and reactions rather than building a fixed world
+  * bold, unrealistic, naive and playful approach rather than cautious, formal, all-knowing and critical
 * **Status**: Phase 1 is complete. Phase 2 planned for November 2017 (see 'roadmap' section below)
 
 Copyright (c) 2017 Artilligence Ltd, UK
