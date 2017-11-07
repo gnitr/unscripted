@@ -27,6 +27,10 @@ class Command(BaseCommand):
         if case == 'repop':
             self.repop(world)
             found = 1
+
+        if case == 'repop_well':
+            self.repop_well(world)
+            found = 1
             
         if not found:
             print 'ERROR: Test case not found (%s)' % case
@@ -43,4 +47,7 @@ class Command(BaseCommand):
                 thing.save()
             except ThingParentError:
                 break
+    
+    def repop_well(self, world):
+        self.repop(world)
         
