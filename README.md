@@ -57,15 +57,3 @@ Those simple ingredients should be enough trigger the evolutionary process. This
 * possibly set up a live site
 * report findings and discuss the choices made; how they compare with animal evolution; what works and what doesn't; where can we go from here
 
-Other ideas:
-* support for individual memorisation of events
-* possibility to transport and trade items
-* bots can alter the world
-* bots can create new things
-* bots can communicate (using emergent language expressed in ascii strings)
-
-Questions:
-* human genome and brain doesn't contain memories; but the bot genome could potentially be a complete snapshot of a mind; should it be avoided, if so how, if not what are the implications?
-* can bot evolution really emerge from the genetic transmission and survival?
-* how does the bot mind update itself during its life if there are no predefined feedback or reward system from the world? Everything is neutral; can the bots build their reward system from it?
-* could we create a self-modifying mind? if so, how much can be changed and how can it be changed?
