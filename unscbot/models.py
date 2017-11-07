@@ -25,11 +25,14 @@ class Bot(object):
             import time
             while True:
                 #self.interact(action='walk', target=self.world['id'], angle=random())
-                self.select_action()
-                self.call_selected_action()
+                self.select_and_call_action()
                 time.sleep(.01)
         
         return ret
+
+    def select_and_call_action(self):
+        self.select_action()
+        self.call_selected_action()
     
     def select_action(self):
         actions = [{'action': 'pass'}]

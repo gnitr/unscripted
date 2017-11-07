@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 from unsccore.things.thing import Thing, ThingParentError
 from unsccore.things.world import World
 from unsccore import mogels
+import time
 
 class Command(BaseCommand):
     help = 'Unscripted core management commands'
@@ -32,6 +33,10 @@ class Command(BaseCommand):
             self.repop_well(world)
             found = 1
             
+        if case == 'simulate':
+            self.simulate(world)
+            found = 1
+
         if not found:
             print 'ERROR: Test case not found (%s)' % case
         
@@ -50,4 +55,28 @@ class Command(BaseCommand):
     
     def repop_well(self, world):
         self.repop(world)
+
+        for i in range(0, 2):
+            Thing.new(module='well', parentid=world.pk).save()
+    
+    def simulate(self, world):
+        from unscbot.models import Bot
+        
+        cycle = 0
+        
+        while True:
+            cycle += 1
+            print 'Cycle: %s' % cycle
+            botids = [t.pk for t in Thing.objects.filter(module='bot', parentid=world.pk).order_by('pk')]
+        
+            if not botids:
+                break
+        
+            for botid in botids:
+                bot = Bot(botid)
+                bot.initialise()
+                bot.select_and_call_action()
+            time.sleep(0.1)
+                
+        
         

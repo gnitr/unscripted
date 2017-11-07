@@ -14,9 +14,14 @@ class WorldEngine(object):
         target = Thing.objects.get(pk=targetid)
         actor = target
         actorid = kwargs.get('actorid', None)
+        world = None
+        
         if actorid:
             del kwargs['actorid']
             actor = Thing.objects.get(pk=actorid)
+            world = Thing.objects.get(pk=actor.rootid)
+            
+        alive = True
         
         if target:
             if action not in ['pass']:
@@ -28,6 +33,7 @@ class WorldEngine(object):
                     else:
                         print 'Not within reach'
                         pass
+                    alive = actor.after_action()
                 else:
                     raise EngineError('Unknown action "%s"' % action)
         
@@ -36,7 +42,13 @@ class WorldEngine(object):
             cache = []
             ret = actor.get_obstructing_things(cache=cache, gap=vision_radius)
             
-            ret.append(Thing.objects.get(pk=actor.rootid))
-        
+            ret.append(world)
+
+        # TODO: who should decide to create a new bot for a dead one?
+        # World? engine?
+        if not alive:
+            thing = Thing.new(module='bot', parentid=world.pk)
+            thing.save()
+            
         return ret
     

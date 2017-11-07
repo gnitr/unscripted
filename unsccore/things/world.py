@@ -58,4 +58,3 @@ class World(Thing):
         if self.parentid:
             raise ThingParentError('Cannot move World X inside something else')
 
-

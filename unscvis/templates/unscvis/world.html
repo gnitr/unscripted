@@ -101,6 +101,9 @@
                 
                 var material = new BABYLON.StandardMaterial("material01", vis.scene);
                 material.ambientColor = new BABYLON.Color3(1,0,0);
+                if (thing.module == 'well') {
+                    material.ambientColor = new BABYLON.Color3(0,0,1);
+                }
                 box.material = material;
                 
                 init_on_click_mesh(box);
