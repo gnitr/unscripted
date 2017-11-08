@@ -19,7 +19,7 @@ class World(Thing):
         super(World, self).__init__(**defaults)
     
     def walk(self, actor, angle=0.0):
-        step_size = 0.5
+        step_size = 0.8
         angle_radian = float(angle) * math.pi * 2
         
         pos = actor.pos

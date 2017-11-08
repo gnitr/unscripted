@@ -21,8 +21,6 @@ class WorldEngine(object):
             actor = Thing.objects.get(pk=actorid)
             world = Thing.objects.get(pk=actor.rootid)
             
-        alive = True
-        
         if target:
             if action not in ['pass']:
                 action_method = getattr(target, action, None)
@@ -33,7 +31,6 @@ class WorldEngine(object):
                     else:
                         print 'Not within reach'
                         pass
-                    alive = actor.after_action()
                 else:
                     raise EngineError('Unknown action "%s"' % action)
         
@@ -44,6 +41,8 @@ class WorldEngine(object):
             
             ret.append(world)
 
+        alive = actor.after_action()
+        
         # TODO: who should decide to create a new bot for a dead one?
         # World? engine?
         if not alive:

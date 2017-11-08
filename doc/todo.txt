@@ -1,3 +1,18 @@
+mind:
+    implement basic NN for action selection
+    with random units functions
+visible:
+    angle and distances to other things rather than positions
+    hide creation date? show number of actions instead
+perf:
+    cache mongo
+    separate client and server to different machines
+test world:
+    smaller
+    die sooner?
+collision bots/things:
+
+
 ! see in a range
 ! act in a narrower range
 

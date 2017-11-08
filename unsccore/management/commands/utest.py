@@ -11,9 +11,11 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('worldid', metavar='worldid', nargs=1, type=str)
         parser.add_argument('case', metavar='case', nargs=1, type=str)
+        parser.add_argument('--cycles', nargs='?', type=int)
 
     def handle(self, *args, **options):
         found = 0
+        self.options = options
         
         worldid = options['worldid'][0]
         case = options['case'][0]
@@ -60,11 +62,17 @@ class Command(BaseCommand):
             Thing.new(module='well', parentid=world.pk).save()
     
     def simulate(self, world):
+        t0 = time.time()
+        
         from unscbot.models import Bot
+        
+        limit = self.options.get('cycles')
         
         cycle = 0
         
         while True:
+            if limit is not None and cycle >= limit:
+                break
             cycle += 1
             print 'Cycle: %s' % cycle
             botids = [t.pk for t in Thing.objects.filter(module='bot', parentid=world.pk).order_by('pk')]
@@ -76,7 +84,14 @@ class Command(BaseCommand):
                 bot = Bot(botid)
                 bot.initialise()
                 bot.select_and_call_action()
-            time.sleep(0.1)
+            #time.sleep(0.1)
                 
+        t1 = time.time()
+        
+        elapsed = t1 - t0
+        speed = cycle / elapsed 
+        # For the server side to support 100 bots to act in real time
+        target_speed = 1.7 * 10
+        print '%.2fs cycles/s (%.2f x slower). %d cycles in %.2f s' % (speed, target_speed / speed, cycle, elapsed)
         
         

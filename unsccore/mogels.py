@@ -174,7 +174,7 @@ class MongoQuerySet(object):
             # TODO: works for simple care field=value
             # but need to convert django operators to mongo
 
-            print 'MONGO FIND (%s)' % repr(filters)
+            ## print 'MONGO FIND (%s)' % repr(filters)
             self.cursor = collection.find(filters)
                 
             if self.query['order']:

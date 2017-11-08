@@ -23,14 +23,25 @@ class Bot(Thing):
         ret = True
         
         self.action_count_ += 1
-        self.drink_ -= 1.0/60/24
+        # Real walking speed = 5 km/h
+        # Real walking step size = 0.8m
+        # If resolution of action is a walking step
+        # we have 6250 actions per hour
+        # or 104 / minutes 
+        # or 1.7 steps/cycle per second
+        # => 1 cycle ~= 0.6 seconds to be real time
+        # B bots * 1 action / cycle => ~ 2 x B actions / seconds
+        cycles_in_a_day = 5000.0/0.8*24
+        # 1 day witout drinking and dies
+        self.drink_ -= 1.0 / cycles_in_a_day
         print self.action_count_
-        if self.action_count_ < 10*60*24:
+        # 10 days lifespan
+        if self.action_count_ < 10*cycles_in_a_day:
             self.save()
         else:
             ret = self.die('natural')
         
-        if ret and self.drink_ < 0.1:
+        if ret and self.drink_ < 0.0:
             ret = self.die('thirst')
             
         return ret
