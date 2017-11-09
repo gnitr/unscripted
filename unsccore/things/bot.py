@@ -17,7 +17,7 @@ class Bot(Thing):
         
     
     def drink(self):
-        self.drink = 1.0
+        self.drink_ = 1.0
         
     def after_action(self):
         ret = True
@@ -34,10 +34,11 @@ class Bot(Thing):
         cycles_in_a_day = 5000.0/0.8*24
         # 1 day witout drinking and dies
         self.drink_ -= 1.0 / cycles_in_a_day
-        print self.action_count_
+        #print self.action_count_
         # 10 days lifespan
         if self.action_count_ < 10*cycles_in_a_day:
-            self.save()
+            #self.save()
+            pass
         else:
             ret = self.die('natural')
         

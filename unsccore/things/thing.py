@@ -144,9 +144,9 @@ class Thing(mogels.MongoDocumentModule):
         min0, max0 = self.get_bounding_box()
         if gap:
             min0[0] -= gap
-            min0[1] -= gap
+            min0[2] -= gap
             max0[0] += gap
-            max0[1] += gap
+            max0[2] += gap
         if cache is None:
             cache = []
         if not cache:

@@ -17,29 +17,37 @@ class World(Thing):
         defaults['pos'] = [defaults['dims'][0] / 2, 0, defaults['dims'][2] / 2]
         defaults.update(kwargs)
         super(World, self).__init__(**defaults)
+        
+    def set_dims(self, dims):
+        self.dims = dims
+        self.pos = [dims[0] / 2, 0, dims[2] / 2]
     
     def walk(self, actor, angle=0.0):
         step_size = 0.8
         angle_radian = float(angle) * math.pi * 2
         
-        pos = actor.pos
+        pos = actor.pos[:]
         actor.pos[0] = pos[0] + math.cos(angle_radian) * step_size
         actor.pos[2] = pos[2] + math.sin(angle_radian) * step_size
         
-        if actor.is_position_valid():
-            actor.save()
-        else:
+        cache = []
+        if not actor.is_position_valid(cache):
             actor.pos = pos
+            if not actor.is_position_valid():
+                self.set_random_valid_pos(actor)
 
     def get_random_pos(self):
         return [random() * self.dims[0], 0, random() * self.dims[2]]
     
-    def _before_inserting_child(self, child):
+    def set_random_valid_pos(self, child):
         cache = []
         while True:
             child.pos = self.get_random_pos()
             if child.is_position_valid(cache):
                 break
+    
+    def _before_inserting_child(self, child):
+        self.set_random_valid_pos(child)
         
         # TODO: move capacity quota to Thing
         

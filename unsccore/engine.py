@@ -36,18 +36,17 @@ class WorldEngine(object):
         
             # Get all the things near actor
             # TODO: optimise!
-            cache = []
-            ret = actor.get_obstructing_things(cache=cache, gap=vision_radius)
-            
-            ret.append(world)
+            ret = [world, actor]
+            ret.extend(actor.get_obstructing_things(cache=[], gap=vision_radius))
 
         alive = actor.after_action()
         
         # TODO: who should decide to create a new bot for a dead one?
         # World? engine?
         if not alive:
-            thing = Thing.new(module='bot', parentid=world.pk)
-            thing.save()
+            actor = Thing.new(module='bot', parentid=world.pk)
+        
+        actor.save()
             
         return ret
     

@@ -1,4 +1,8 @@
 Django==1.11.6
 #djangorestframework==3.7.1
+requests==2.18.4
 pymongo==3.5.1
 requests==2.18.4
+#pytorch
+http://download.pytorch.org/whl/cu80/torch-0.2.0.post3-cp27-cp27mu-manylinux1_x86_64.whl
+torchvision  

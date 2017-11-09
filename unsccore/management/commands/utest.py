@@ -56,6 +56,8 @@ class Command(BaseCommand):
                 break
     
     def repop_well(self, world):
+        world.set_dims([10, 10, 10])
+        world.save()
         self.repop(world)
 
         for i in range(0, 2):
