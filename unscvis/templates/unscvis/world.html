@@ -38,6 +38,8 @@
         crossorigin="anonymous"></script>
         
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/2.5.0/babylon.js"></script>
+    <script src="https://preview.babylonjs.com/loaders/babylon.objFileLoader.js"></script>
+    <script src="https://code.jquery.com/pep/0.4.1/pep.js"></script>
     <script src="/static/unscvis/utils.js"></script>
  
     <script>
@@ -54,10 +56,12 @@
             camera: null,
             draw_cycle: 0,
             camera_target: null,
+            meshes: {},
         };
       
         function request_world() {
-            $.getJSON('http://localhost:8000/api/1/worlds/'+window.world.id+'/things', function(response) {
+            //$.getJSON('http://localhost:8000/api/1/worlds/'+window.world.id+'/things', function(response) {
+            $.getJSON('/api/1/worlds/'+window.world.id+'/things', function(response) {
                 render_things(response.data.items);
             });
         }
@@ -84,12 +88,11 @@
             });
         }
         
-        function draw_thing(thing) {
-            var vis = window.vis;
-            
-            var box = vis.scene.getMeshByName(thing.id);
-            if (!box) {
-                box = BABYLON.MeshBuilder.CreateBox(
+        function load_obj(thing) {
+        	var name = thing.module;
+        	var mesh= null;
+            if (1 || (name == 'bot')) {
+                mesh = BABYLON.MeshBuilder.CreateBox(
                         thing.id,
                         {
                             width: thing.dims[0],
@@ -98,23 +101,53 @@
                         }, 
                         vis.scene
                     );
-                
+            }
+            if (name == 'well2') {
+                var model = vis.meshes[name];
+                if (!model) {
+                	console.log('LOAD');
+                    BABYLON.SceneLoader.ImportMesh("", "/static/unscvis/", "sm_well_02.obj", vis.scene, function (meshes, particleSystems) {
+                        var mesh = BABYLON.Mesh.MergeMeshes(meshes);
+                        var sc = 0.4;
+                        mesh.scaling = new BABYLON.Vector3(sc, sc, sc);
+                        vis.meshes.well = mesh;
+                        //load_obj(thing);
+                        mesh.setEnabled(false)
+                    });
+                } else {
+                    mesh = model.createInstance(thing.id);
+                }
+            }
+            if (mesh) {
                 var material = new BABYLON.StandardMaterial("material01", vis.scene);
                 material.ambientColor = new BABYLON.Color3(1,0,0);
                 if (thing.module == 'well') {
                     material.ambientColor = new BABYLON.Color3(0,0,1);
                 }
-                box.material = material;
-                
-                init_on_click_mesh(box);
+                mesh.material = material;
+            
+                init_on_click_mesh(mesh);
+        	}
+        }
+        
+        function draw_thing(thing) {
+            var vis = window.vis;
+            
+            var box = vis.scene.getMeshByName(thing.id);
+            if (!box) {
+                box = load_obj(thing);
             }
-            box.position.x = thing.pos[0];
-            box.position.y = thing.pos[1];
-            box.position.z = thing.pos[2];
-            box.position.y += box.getBoundingInfo().boundingBox.extendSize.y;
-            //box.position.y = 10;
-            window.things[thing.id] = thing;
-            thing.draw_cycle = vis.draw_cycle;
+            if (box) {
+                box.position.x = thing.pos[0];
+                box.position.y = thing.pos[1];
+                box.position.z = thing.pos[2];
+                if (thing.module == 'bot') {
+                    box.position.y += box.getBoundingInfo().boundingBox.extendSize.y;
+                }
+                //box.position.y = 10;
+                window.things[thing.id] = thing;
+                thing.draw_cycle = vis.draw_cycle;
+            }
         }
         
         function init_on_click_mesh(mesh) {
@@ -134,6 +167,8 @@
             var vis = window.vis;
             vis.scene = new BABYLON.Scene(vis.engine);
             var world = window.world;
+            
+            //var loader = new BABYLON.AssetsManager(vis.scene);
             
             vis.radius = window.world.dims[0];
             if (window.world.dims[0] < window.world.dims[1]) {
@@ -156,6 +191,8 @@
             //light1.groundColor = new BABYLON.Color3(0.5, 0.5, 0.5);
             vis.scene.ambientColor = new BABYLON.Color3(0.3, 0.3, 0.3);
             //var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), vis.scene);
+
+            //var awell = loader.addMeshTask("well", "", "/static/unscvis/", "sm_well_02.obj");
 
             // Add and manipulate meshes in the scene
             //var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:2}, vis.scene);
@@ -211,7 +248,7 @@
                 if (0) {
                     var width = $div.width();
                     var height = $div.height();
-                    $('#vis-container').html('<canvas id="cnv-world" width="'+width+'" height="'+height+'"></canvas>');
+                    $('#vis-container').html('<canvas touch-action="none" id="cnv-world" width="'+width+'" height="'+height+'"></canvas>');
                     canvas = $('#cnv-world')[0];
                     ret = vis.canvas.getContext('2d');
                 } else {
