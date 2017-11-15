@@ -18,11 +18,13 @@
 
 Copyright (c) 2017 Artilligence Ltd, UK
 
+[Run it on your machine](https://github.com/gnitr/unscripted/wiki/Installation)
+
+[Implementation Details](https://github.com/gnitr/unscripted/wiki/Implementation-Details)
+
 [Background](https://github.com/gnitr/unscripted/wiki/Motivations-&-Background)
 
 [About us](https://github.com/gnitr/unscripted/wiki/About-Us)
-
-[Implementation Details](https://github.com/gnitr/unscripted/wiki/Implementation-Details)
 
 # Road map
 
