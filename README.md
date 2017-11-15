@@ -26,9 +26,9 @@ Copyright (c) 2017 Artilligence Ltd, UK
 
 [About us](https://github.com/gnitr/unscripted/wiki/About-Us)
 
-* Screenshot
+# Screenshot
 
-Be warned, it looks pretty underwhelming...
+Be warned, unless you use your imagination it looks pretty underwhelming...
 
 <img src="https://github.com/gnitr/unscripted/blob/master/doc/unscripted-world-0.2.png?raw=true" height="300">
 
