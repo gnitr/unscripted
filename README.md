@@ -26,6 +26,14 @@ Copyright (c) 2017 Artilligence Ltd, UK
 
 [About us](https://github.com/gnitr/unscripted/wiki/About-Us)
 
+* Screenshot
+
+Be warned, it looks pretty underwhelming...
+
+<img src="https://github.com/gnitr/unscripted/blob/master/doc/unscripted-world-0.2.png?raw=true" height="300">
+
+That's 10mx10m world with 10 bots and 2 wells.
+
 # Road map
 
 ## 0.1: Set up architecture (completed Oct 2017, to be documented)
