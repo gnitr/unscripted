@@ -11,16 +11,28 @@
   * building an open framework rather than a single AI algorithm
   * hoping to provoke new questions and reactions rather than building a fixed world
   * bold, unrealistic, naive and playful approach rather than cautious, formal, all-knowing and critical
+  * wider reflexion about artificial and human life rather than a purely technical project
+* **This is NOT**: it's NOT a chat bot! Think P-NPC (a playing non-playing-character). A world where NPCs are the heros.
 * **Status**: Phase 2 is complete. Phase 3 planned for November 2017 (see 'roadmap' section below)
-* **Demo**: Demo screenshots & video will come once I see a form of adaptation
+* **Demo**: Demo video will come once I see a form of adaptation emerging
 
 Copyright (c) 2017 Artilligence Ltd, UK
+
+[Run it on your machine](https://github.com/gnitr/unscripted/wiki/Installation)
+
+[Implementation Details](https://github.com/gnitr/unscripted/wiki/Implementation-Details)
 
 [Background](https://github.com/gnitr/unscripted/wiki/Motivations-&-Background)
 
 [About us](https://github.com/gnitr/unscripted/wiki/About-Us)
 
-[Implementation Details](https://github.com/gnitr/unscripted/wiki/Implementation-Details)
+# Screenshot
+
+Be warned, unless you use your imagination it looks pretty underwhelming...
+
+<img src="https://github.com/gnitr/unscripted/blob/master/doc/unscripted-world-0.2.png?raw=true" height="300">
+
+That's 10mx10m world with 10 bots and 2 wells.
 
 # Road map
 
