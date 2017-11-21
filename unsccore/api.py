@@ -50,24 +50,28 @@ class UnscriptedAPI(object):
     
         return self.response
 
-    def get_link_from_thing(self, thing, rel='self'):
-        ret = {}
+    def get_links_from_thing(self, thing):
+        ret = []
+        
         if thing.pk:
-            ret = {
-                'rel': rel,
+            ret.append({
+                'rel': 'self',
                 'href': self.get_href('/'.join([thing.get_module_key_plural(), thing.pk]))
-            }
+            })
+            ret.append({
+                'rel': 'vis',
+                'href': self.get_href('/vis/worlds/%s/' % thing.rootid, is_absolute=True)
+            })
+        
         return ret
     
     def get_json_data_from_thing(self, thing):
         ret = thing.get_api_dict()
-        link = self.get_link_from_thing(thing)
-        if link:
-            ret['link'] = [link]
+        links = self.get_links_from_thing(thing)
+        if links:
+            ret['links'] = links
         if 1:
             ret['_class'] = thing.__class__.__name__
-        if 0 and thing.parentid:
-            ret['link'] = [self.get_link_from_thing(thing.parent), 'parent']
         return ret
 
     def _process(self):
@@ -178,15 +182,18 @@ class UnscriptedAPI(object):
         ret = ret.rstrip('s')
         return ret
 
-    def get_href(self, path=''):
+    def get_href(self, path='', is_absolute=False):
         import re
-        abspath = [
-            re.sub(r'(.*)%s.*?' % re.escape(self.path), 
-                   r'\1', 
-                   self.request.path
-            ),
-            path
-        ]
+        if is_absolute:
+            abspath = [path]
+        else:
+            abspath = [
+                re.sub(r'(.*)%s.*?' % re.escape(self.path), 
+                       r'\1', 
+                       self.request.path
+                ),
+                path
+            ]
 
         return '%s://%s/%s' % (
             self.request.scheme, 

@@ -90,7 +90,7 @@ DB_THINGS = {
     'ENGINE':   'pymongo',
     'NAME':     'unscripted',
     'HOST':     'localhost',
-    'PORT':     '27018',
+    'PORT':     '27017',
 }
 
 
