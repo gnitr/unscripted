@@ -23,7 +23,7 @@ class UnscriptedAPI(object):
         self.errors = []
         self.request = request
         self.path = path
-        self.method = request.GET.get('method', request.method).upper()
+        self.method = request.GET.get('@method', request.method).upper()
         
         self.response = OrderedDict([
             ['version', self.get_major_version()],
@@ -82,6 +82,7 @@ class UnscriptedAPI(object):
         api_method = None
         data_items = []
         data = {}
+        request_filters = {k: v for k, v in self.request.GET.iteritems() if not k.startswith('@')}
         
         if len(parts) < 1:
             api_method = 'api.get'
@@ -120,7 +121,7 @@ class UnscriptedAPI(object):
             
             if athing:
                 thingid = parts.pop(0) if parts else None
-                things = athing.__class__.objects.all()
+                things = athing.__class__.objects.filter(**request_filters)
                 if parentid:
                     things = things.filter(parentid=parentid)
                     

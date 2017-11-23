@@ -16,6 +16,14 @@
         }
         
         #info-box {
+            position: absolute;
+            width: 50%;
+            height: 5em;
+            top: 0;
+            left: 0;
+            background-color: rgba(255, 255, 200, 0.7);
+            color: black;
+            padding: 0.5em;
         }
         
     </style>
@@ -61,7 +69,9 @@
       
         function request_world() {
             //$.getJSON('http://localhost:8000/api/1/worlds/'+window.world.id+'/things', function(response) {
-            $.getJSON('/api/1/worlds/'+window.world.id+'/things', function(response) {
+            //var query = '/api/1/worlds/'+window.world.id+'/things';
+            var query = '/api/1/things?rootid='+window.world.id;
+            $.getJSON(query, function(response) {
                 render_things(response.data.items);
             });
         }
@@ -86,6 +96,11 @@
                     delete window.things[thing.id];
                 }
             });
+        }
+        
+        function write_info(message, add) {
+            var existing = add ? $('#info-box').html() + '<br/>' : '';
+            $('#info-box').html(existing + message);
         }
         
         function load_obj(thing) {
@@ -131,6 +146,11 @@
         }
         
         function draw_thing(thing) {
+            if (thing.module == 'world') {
+                write_info('cycle: ' + thing.cycle);
+                return;
+            }
+        	
             var vis = window.vis;
             
             var box = vis.scene.getMeshByName(thing.id);
@@ -147,6 +167,10 @@
                 //box.position.y = 10;
                 window.things[thing.id] = thing;
                 thing.draw_cycle = vis.draw_cycle;
+                
+                if (box == vis.camera_target) {
+                    write_info(thing.name + ', ' + thing.action_count, 1);
+                }
             }
         }
         

@@ -45,20 +45,23 @@ class Command(BaseCommand):
         print 'done'
         
     def repop(self, world, bot_dims=None):
-        world.delete_children()
+        world.recreate()
+        female = 1
         while True:
-            thing = Thing.new(module='bot', parentid=world.pk)
+            thing = Thing.new(module='bot', parentid=world.pk, female=female)
             if bot_dims:
                 thing.dims = bot_dims
             try:
                 thing.save()
             except ThingParentError:
                 break
+            
+            female = 1 - female
     
     def repop_well(self, world):
         world.set_dims([10, 10, 10])
-        world.save()
         self.repop(world)
+        world.save()
 
         for i in range(0, 2):
             Thing.new(module='well', parentid=world.pk).save()
@@ -86,6 +89,9 @@ class Command(BaseCommand):
                 bot = Bot(botid)
                 bot.initialise()
                 bot.select_and_call_action()
+            
+            world.end_cycle()
+            world.save()
             #time.sleep(0.1)
                 
         t1 = time.time()

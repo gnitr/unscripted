@@ -12,7 +12,8 @@ class World(Thing):
             'capacity': {
                 'bot': 10,
                 'thing': 100,
-            }
+            },
+            'cycle': 0
         }
         defaults['pos'] = [defaults['dims'][0] / 2, 0, defaults['dims'][2] / 2]
         defaults.update(kwargs)
@@ -35,6 +36,13 @@ class World(Thing):
             actor.pos = pos
             if not actor.is_position_valid():
                 self.set_random_valid_pos(actor)
+    
+    def recreate(self):
+        self.delete_children()
+        self.cycle = 0
+    
+    def end_cycle(self):
+        self.cycle += 1
 
     def get_random_pos(self):
         return [random() * self.dims[0], 0, random() * self.dims[2]]
