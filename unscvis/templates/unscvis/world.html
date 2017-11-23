@@ -74,6 +74,7 @@
                 var query = '/api/1/things?rootid='+window.world.id;
                 $.getJSON(query, function(response) {
                     render_things(response.data.items);
+                    display_info();
                 });
             }
         }
@@ -100,9 +101,18 @@
             });
         }
         
-        function write_info(message, add) {
-            var existing = add ? $('#info-box').html() + '<br/>' : '';
-            $('#info-box').html(existing + message);
+        function write_info(message) {
+            if (window.vis_info) {
+                window.vis_info += '<br/>';
+            } else {
+                window.vis_info = '';
+            }
+        	window.vis_info += message;
+        }
+        
+        function display_info() {
+            $('#info-box').html(window.vis_info);
+            window.vis_info = '';
         }
         
         function load_obj(thing) {
@@ -174,7 +184,7 @@
                 thing.draw_cycle = vis.draw_cycle;
                 
                 if (box == vis.camera_target) {
-                    write_info(thing.name + ', ' + thing.action_count, 1);
+                    write_info(thing.name + ', ' + thing.action_count);
                 }
             }
         }
