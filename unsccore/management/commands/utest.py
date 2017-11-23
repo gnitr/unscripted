@@ -68,19 +68,20 @@ class Command(BaseCommand):
             
     def start_new_cycle(self, cycle, world):
         cycle += 1
-        if cycle % 10 == 0:
+        cycle_window = 5
+        if cycle % cycle_window == 0:
             if cycle > 0:
                 self.t1 = time.time()
                 
                 elapsed = self.t1 - self.t0
-                speed = cycle / elapsed 
+                speed = cycle_window / elapsed 
                 # For the server side to support 100 bots to act in real time
                 walking_step_duration = 0.6
                 target_population = 100
                 # compress 4M years of evolution in 40000 years 
                 target_speed_ratio = 100
                 target_speed = (1.0 / walking_step_duration) * target_population * target_speed_ratio
-                print '%.2fs cycles/s (%.2f x slower). %d cycles in %.2f s' % (speed, target_speed / speed, cycle, elapsed)
+                print '%.2fs cycles/s (%.2f x slower). %d cycles in %.2f s' % (speed, target_speed / speed, cycle_window, elapsed)
                 
                 world.perf = {
                     'cycle_per_second': speed,

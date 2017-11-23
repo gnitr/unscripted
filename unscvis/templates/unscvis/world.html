@@ -149,7 +149,7 @@
             if (thing.module == 'world') {
                 perf = thing.perf;
                 if (perf) {
-                    write_info('cycle: ' + thing.cycle + '; ' + world.perf.cycle_per_second.toFixed(2) + ' c/s; ' + world.perf.speed_ratio.toFixed(2) + ' x below target');
+                    write_info('cycle: ' + thing.cycle + '; ' + perf.cycle_per_second.toFixed(2) + ' c/s; ' + perf.speed_ratio.toFixed(2) + ' x below target');
                 }
                 return;
             }
@@ -313,7 +313,7 @@
         
         request_world();
         
-        window.setInterval(request_world, 250);
+        window.setInterval(request_world, 500);
     });
    </script>
 {% endblock %}
