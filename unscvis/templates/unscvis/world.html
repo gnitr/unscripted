@@ -68,12 +68,14 @@
         };
       
         function request_world() {
-            //$.getJSON('http://localhost:8000/api/1/worlds/'+window.world.id+'/things', function(response) {
-            //var query = '/api/1/worlds/'+window.world.id+'/things';
-            var query = '/api/1/things?rootid='+window.world.id;
-            $.getJSON(query, function(response) {
-                render_things(response.data.items);
-            });
+            if (unscutils.is_tab_visible()) {
+                //$.getJSON('http://localhost:8000/api/1/worlds/'+window.world.id+'/things', function(response) {
+                //var query = '/api/1/worlds/'+window.world.id+'/things';
+                var query = '/api/1/things?rootid='+window.world.id;
+                $.getJSON(query, function(response) {
+                    render_things(response.data.items);
+                });
+            }
         }
         
         function render_things(things) {

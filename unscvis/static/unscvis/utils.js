@@ -1,5 +1,6 @@
 (function($) {
     $(function() {
+        window.is_tab_focused = 1;
         window.unscutils = {
             /*
                 Returns the height $element should have to fill the remaining
@@ -51,6 +52,32 @@
                 $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e) {on_resize(e);});
                 on_resize();
             },
+
+            f1: $(window).on("blur focus", function(e) {
+                var prevType = $(this).data("prevType");
+
+                if (prevType != e.type) {   //  reduce double fire issues
+                    switch (e.type) {
+                        case "blur":
+                        	window.is_tab_focused = 0;
+                            // do work
+                            break;
+                        case "focus":
+                        	window.is_tab_focused = 1;
+                            // do work
+                            break;
+                    }
+                }
+
+                $(this).data("prevType", e.type);
+            }),
+            
+            is_tab_visible: function() {
+                if (typeof document.hidden !== 'undefined') {
+                    return !document.hidden;
+                }
+                return (window.is_tab_focused !== 0);
+            }
         }
     });
 })(jQuery);
