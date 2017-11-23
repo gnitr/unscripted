@@ -147,7 +147,10 @@
         
         function draw_thing(thing) {
             if (thing.module == 'world') {
-                write_info('cycle: ' + thing.cycle);
+                perf = thing.perf;
+                if (perf) {
+                    write_info('cycle: ' + thing.cycle + '; ' + world.perf.cycle_per_second.toFixed(2) + ' c/s; ' + world.perf.speed_ratio.toFixed(2) + ' x below target');
+                }
                 return;
             }
         	

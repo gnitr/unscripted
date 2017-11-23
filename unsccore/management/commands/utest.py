@@ -65,22 +65,47 @@ class Command(BaseCommand):
 
         for i in range(0, 2):
             Thing.new(module='well', parentid=world.pk).save()
+            
+    def start_new_cycle(self, cycle, world):
+        cycle += 1
+        if cycle % 10 == 0:
+            if cycle > 0:
+                self.t1 = time.time()
+                
+                elapsed = self.t1 - self.t0
+                speed = cycle / elapsed 
+                # For the server side to support 100 bots to act in real time
+                walking_step_duration = 0.6
+                target_population = 100
+                # compress 4M years of evolution in 40000 years 
+                target_speed_ratio = 100
+                target_speed = (1.0 / walking_step_duration) * target_population * target_speed_ratio
+                print '%.2fs cycles/s (%.2f x slower). %d cycles in %.2f s' % (speed, target_speed / speed, cycle, elapsed)
+                
+                world.perf = {
+                    'cycle_per_second': speed,
+                    'speed_ratio': target_speed / speed,
+                }
+                
+            self.t0 = time.time()
+            
+        return cycle
     
     def simulate(self, world):
-        t0 = time.time()
-        
         from unscbot.models import Bot
         
         limit = self.options.get('cycles')
         
-        cycle = 0
+        cycle = -1
         
         bots = {}
         
         while True:
+            cycle = self.start_new_cycle(cycle, world)
+            
             if limit is not None and cycle >= limit:
                 break
-            cycle += 1
+            
             print 'Cycle: %s' % cycle
             botids = [t.pk for t in Thing.objects.filter(module='bot', parentid=world.pk).order_by('pk')]
         
@@ -98,17 +123,7 @@ class Command(BaseCommand):
             world.end_cycle()
             world.save()
             #time.sleep(0.1)
+        
+        world.save()
                 
-        t1 = time.time()
-        
-        elapsed = t1 - t0
-        speed = cycle / elapsed 
-        # For the server side to support 100 bots to act in real time
-        walking_step_duration = 0.6
-        target_population = 100
-        # compress 4M years of evolution in 40000 years 
-        target_speed_ratio = 100
-        target_speed = (1.0 / walking_step_duration) * target_population * target_speed_ratio
-        print '%.2fs cycles/s (%.2f x slower). %d cycles in %.2f s' % (speed, target_speed / speed, cycle, elapsed)
-        
         
