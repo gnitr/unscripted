@@ -75,6 +75,8 @@ class Command(BaseCommand):
         
         cycle = 0
         
+        bots = {}
+        
         while True:
             if limit is not None and cycle >= limit:
                 break
@@ -85,9 +87,12 @@ class Command(BaseCommand):
             if not botids:
                 break
         
+            # TODO: remove dead bots from <bots>
             for botid in botids:
-                bot = Bot(botid)
-                bot.initialise()
+                bot = bots.get(botid, None)
+                if bot is None:
+                    bots[botid] = bot = Bot(botid)
+                    bot.initialise()
                 bot.select_and_call_action()
             
             world.end_cycle()

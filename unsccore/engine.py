@@ -44,7 +44,7 @@ class WorldEngine(object):
         # TODO: who should decide to create a new bot for a dead one?
         # World? engine?
         if not alive:
-            actor = Thing.new(module='bot', parentid=world.pk)
+            actor = Thing.new(module='bot', parentid=world.pk, female=actor.female)
         
         actor.save()
             

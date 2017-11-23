@@ -40,6 +40,7 @@ class Bot(Thing):
         # B bots * 1 action / cycle => ~ 2 x B actions / seconds
         # 150k actions / bot / day
         cycles_in_a_day = 5000.0/0.8*24
+        # cycles_in_a_day = 4
         # 1 day without drinking and dies
         self.drink_ -= 1.0 / cycles_in_a_day
         #print self.action_count

@@ -78,3 +78,4 @@ class Thing
     actionX
     _actionY
     
+    
