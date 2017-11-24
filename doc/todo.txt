@@ -1,3 +1,7 @@
+Optimisation:
+    80% of the time is spent on the server side
+    
+
 mind:
     implement basic NN for action selection
     with random units functions

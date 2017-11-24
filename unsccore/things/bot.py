@@ -39,6 +39,7 @@ class Bot(Thing):
         # => 1 cycle ~= 0.6 seconds to be real time
         # B bots * 1 action / cycle => ~ 2 x B actions / seconds
         # 150k actions / bot / day
+        # 1/(5000/60/60)*0.8 = 0.576 s
         cycles_in_a_day = 5000.0/0.8*24
         # cycles_in_a_day = 4
         # 1 day without drinking and dies
