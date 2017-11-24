@@ -178,10 +178,11 @@ class Thing(mogels.MongoDocumentModule):
         ret = getattr(Thing, k, None)
         
         if ret is None:
-            #print 'read from disk cache'
+            print 'INFO: READ actions from disk cache'
             ret = json.loads(cache.get('actions', '{}'))
-            if ret:
-                setattr(Thing, k, ret)
+            if not ret:
+                ret = cls.cache_actions()
+            setattr(Thing, k, ret)
 
         ret = ret.get(cls.get_module_key(), [])
         
@@ -190,9 +191,10 @@ class Thing(mogels.MongoDocumentModule):
     @classmethod
     def cache_actions(cls):
         '''Cache all the actions from all the types of things'''
-        import json
         import os
         ret = {}
+        
+        print 'INFO: GENERATE ACTION CACHE'
         
         for afile in os.listdir(os.path.dirname(__file__)):
             if afile.endswith('.py'):
