@@ -4,7 +4,7 @@ import re
 import json
 from datetime import datetime
 from bson.objectid import ObjectId
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.core.exceptions import ObjectDoesNotExist
 
 def get_class_name_from_module_key(module_key):
     ''' my_class -> MyClass '''
@@ -14,9 +14,16 @@ def get_key_from_class_name(class_name):
     ''' MyClass -> my_class'''
     return re.sub(r'([A-Z])', r'_\1', class_name).strip('_').lower()
 
+def get_mongo_dict_from_model(model):
+    ret = _get_mongo_dict_from_model_dict(model.__dict__)
+    # A bit special, .module is a class variable and therefore not part 
+    # of __dict__, it's thus treated slightly differently.
+    ret['module'] = model.module
+    return ret
+
 # dictionary conversion among 
 # Mongo DB document, Django Model __dict__ and Web API json dict
-def get_mongo_dict_from_model_dict(d):
+def _get_mongo_dict_from_model_dict(d):
     ret = {}
     for k, v in d.iteritems():
         if callable(v): 
@@ -27,7 +34,7 @@ def get_mongo_dict_from_model_dict(d):
         if k == '_id' and v is None:
             continue
         if isinstance(v, dict):
-            v = get_mongo_dict_from_model_dict(v)
+            v = _get_mongo_dict_from_model_dict(v)
         elif isinstance(v, basestring) and len(v) == len('59ea5544274d0a2924d8b06b') and k.endswith('id'):
             v = ObjectId(v)
         ret[k] = v
@@ -36,6 +43,9 @@ def get_mongo_dict_from_model_dict(d):
 def get_model_dict_from_mongo_dict(d):
     ret = {}
     for k, v in d.iteritems():
+        if k == 'module':
+            # .module is derived from the model class (Bot.module = 'bot')
+            continue
         if k == '_id':
             k = 'pk'
         if k.startswith('_'): continue
@@ -46,14 +56,19 @@ def get_model_dict_from_mongo_dict(d):
         ret[k] = v
     return ret
 
-def get_api_dict_from_model_dict(d):
+def get_api_dict_from_model(model):
+    ret = _get_api_dict_from_model_dict(model.__dict__)
+    ret['module'] = model.module
+    return ret
+    
+def _get_api_dict_from_model_dict(d):
     ret = {}
     for k, v in d.iteritems():
         if k == 'pk':
             k = 'id'
         if k.startswith('_'): continue
         if isinstance(v, dict):
-            v = get_api_dict_from_model_dict(v)
+            v = _get_api_dict_from_model_dict(v)
         ret[k] = v
     return ret
 
@@ -77,16 +92,19 @@ class MongoQuerySet(object):
     A pymongo query builder and cursor over a result 
     that implements some of the django QuerySet interface.
     '''
-    # TODO: any call modifying the query should return a NEW instance
-    # e.g. q = .all(); q2 = q.filter(pk=123)
     
     _client = None
     _db = None
     
     def __init__(self, doc_class):
-        self.reset_query()
-        self.query_executed_hash = None
+        '''
+        doc_class: MongoModel or subclass. Used as a default to instantiate 
+        a Mongo Document. 
+        '''
         self.doc_class = doc_class
+        # a hash of the last query executed on Mongo by this QuerySet 
+        self.query_executed_hash = None
+        self.reset_query()
         
     def reset_query(self):
         self.query = {'filters': {}, 'order': None}
@@ -102,8 +120,6 @@ class MongoQuerySet(object):
         collection = self._get_collection()
         name = 'idx_%s' % akeys
         collection.create_index(akeys, unique=unique, name=name)
-#         for idx in collection.list_indexes():
-#             print idx
     
     def clone(self):
         import copy
@@ -123,10 +139,11 @@ class MongoQuerySet(object):
 
     def create(self, **kwargs):
         obj = self.doc_class.new(**kwargs)
-        ret = obj.save()
+        obj.save()
         return obj
     
     def all(self):
+        # TODO: reset query?
         ret = self.clone()
         return ret
 
@@ -135,6 +152,12 @@ class MongoQuerySet(object):
         if filters:
             ret.query['filters'].update(filters)
         return ret
+    
+    def first(self):
+        try:
+            return self._get_next(1)
+        except StopIteration:
+            return None
     
     def get(self, **filters):
         docs = self.filter(**filters)
@@ -150,18 +173,6 @@ class MongoQuerySet(object):
     def order_by(self, key):
         self.query['order'] = key
         return self
-    
-    def first(self):
-        return self._get_next(1)
-#         ret = None
-#         cursor = self._get_cursor()
-#         cursor.limit(1)
-#         cursor.next()
-#         try:
-#             ret = self.doc_class.new(**cursor[0])
-#         except IndexError, e:
-#             pass
-#         return ret
     
     def __iter__(self):
         return self.clone()
@@ -193,7 +204,7 @@ class MongoQuerySet(object):
             collection = self._get_collection()
             # TODO: query
             
-            filters = get_mongo_dict_from_model_dict(self.query['filters'])
+            filters = _get_mongo_dict_from_model_dict(self.query['filters'])
             # TODO: works for simple care field=value
             # but need to convert django operators to mongo
 
@@ -273,12 +284,19 @@ class MongoModel(object):
             setattr(self, k, v)
 
     def _get_mongo_dict(self):
-        return get_mongo_dict_from_model_dict(self.__dict__)
+        return get_mongo_dict_from_model(self)
     
     def get_api_dict(self):
-        return get_api_dict_from_model_dict(self.__dict__)
+        return get_api_dict_from_model(self)
     
     objects = ClassProperty(get_objects)
+
+class MongoDocumentModuleMeta(type):
+    '''Used as a cache for optimisation purpose'''
+
+    def __init__(cls, name, bases, dct):
+        super(MongoDocumentModuleMeta, cls).__init__(name, bases, dct)
+        cls.module = get_key_from_class_name(cls.__name__)
     
 class MongoDocumentModule(MongoModel):
     '''
@@ -290,10 +308,12 @@ class MongoDocumentModule(MongoModel):
     and class that will be used to instantiate the model object.
     '''
     
+    __metaclass__ = MongoDocumentModuleMeta
+    
+    # e.g. {'bot': <Bot>, ...}
     _ccache = {'modules_class': {}}
     
     def __init__(self, **kwargs):
-        self.module = self.get_module_key()
         self.created = datetime.utcnow()
         super(MongoDocumentModule, self).__init__(**kwargs)
     
@@ -327,14 +347,14 @@ class MongoDocumentModule(MongoModel):
     @classmethod
     def get_objects(cls):
         ret = super(MongoDocumentModule, cls).get_objects()
-        ret = ret.filter(module=cls.get_module_key())
+        ret = ret.filter(module=cls.module)
         return ret
 
     objects = ClassProperty(get_objects)
 
-    @classmethod
-    def get_module_key(cls):
-        return get_key_from_class_name(cls.__name__)
+#     @classmethod
+#     def get_module_key(cls):
+#         return cls.module
     
     def get_module_key_plural(self):
         ret = self.module

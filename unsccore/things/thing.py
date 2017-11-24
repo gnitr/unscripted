@@ -56,6 +56,8 @@ class Thing(mogels.MongoDocumentModule):
     def get_objects(cls):
         ret = super(Thing, cls).get_objects()
         if cls == Thing:
+            # It's a way to clear the filter module=cls
+            # so searching with Thing.objects returns all types of things.
             ret.reset_query()
         return ret
 
@@ -184,7 +186,7 @@ class Thing(mogels.MongoDocumentModule):
                 ret = cls.cache_actions()
             setattr(Thing, k, ret)
 
-        ret = ret.get(cls.get_module_key(), [])
+        ret = ret.get(cls.module, [])
         
         return ret
         

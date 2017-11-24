@@ -20,9 +20,14 @@ class Command(BaseCommand):
         self.options = options
         
         worldid = options['worldid'][0]
+        if worldid == 'any':
+            world = World.objects.first()
+            worldid = world.pk
+        else: 
+            world = Thing.objects.get(pk=worldid)
+        
         case = options['case'][0]
         
-        world = Thing.objects.get(pk=worldid)
         found = 0
         
         if case == 'pactions':
@@ -100,9 +105,12 @@ class Command(BaseCommand):
     
     def pactions(self, world):
         engine = WorldEngine()
-        for i in xrange(1000):
-            print i
-            engine.action(targetid=world.pk, action='walk', actorid='5a163a9e274d0a51189b5b4a', angle=random())
+        abot = Thing.objects.filter(module='bot').first()
+        if abot:
+            print 'bot %s' % abot.pk
+            for i in xrange(1000):
+                print i
+                engine.action(targetid=world.pk, action='walk', actorid=abot.pk, angle=random())
     
     def simulate(self, world):
         from unscbot.models import Bot

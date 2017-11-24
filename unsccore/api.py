@@ -127,10 +127,12 @@ class UnscriptedAPI(object):
                     
                 if thingid:
                     api_method = '%s.get' % resource_type
-                    #things = things.filter(pk=thingid)
                     try:
                         things = [things.get(pk=thingid)]
                     except ObjectDoesNotExist:
+                        # IMPORTANT: without this, /things/ID/?@method=DELETE  
+                        # would delete all things if ID doesn't exists (i.e. except).
+                        things = []
                         self.errors.append({
                             'code': 404,
                             'message': 'Resource not found: %s.id = %s' % (module, thingid)
