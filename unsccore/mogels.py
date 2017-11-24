@@ -290,6 +290,8 @@ class MongoDocumentModule(MongoModel):
     and class that will be used to instantiate the model object.
     '''
     
+    _ccache = {'modules_class': {}}
+    
     def __init__(self, **kwargs):
         self.module = self.get_module_key()
         self.created = datetime.utcnow()
@@ -298,7 +300,6 @@ class MongoDocumentModule(MongoModel):
     @classmethod
     def new(cls, **doc):
         # TODO: error management!
-        import importlib
         module_key = doc.get('module', None)
         aclass = cls.get_class_from_module_key(module_key)
         if aclass:
@@ -310,13 +311,14 @@ class MongoDocumentModule(MongoModel):
     
     @classmethod
     def get_class_from_module_key(cls, module_key):
-        ret = None
+        ret = cls._ccache['modules_class'].get(module_key, None)
 
-        if module_key:
+        if not ret and module_key:
             import importlib
             try:
                 module = importlib.import_module('.'+module_key, 'unsccore.things')
                 ret = getattr(module, get_class_name_from_module_key(module_key), None)
+                cls._ccache['modules_class'][module_key] = ret
             except ImportError:
                 pass
         

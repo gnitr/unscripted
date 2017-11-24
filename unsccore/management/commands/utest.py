@@ -5,6 +5,7 @@ from unsccore.things.world import World
 from unsccore import mogels
 import time
 from unsccore.engine import WorldEngine
+from random import random
 
 class Command(BaseCommand):
     help = 'Unscripted core management commands'
@@ -101,7 +102,7 @@ class Command(BaseCommand):
         engine = WorldEngine()
         for i in xrange(1000):
             print i
-            engine.action(targetid=world.pk, action='pass', actorid='5a163a9e274d0a51189b5b4a')
+            engine.action(targetid=world.pk, action='walk', actorid='5a163a9e274d0a51189b5b4a', angle=random())
     
     def simulate(self, world):
         from unscbot.models import Bot
