@@ -16,7 +16,6 @@ class Command(BaseCommand):
         parser.add_argument('--cycles', nargs='?', type=int)
 
     def handle(self, *args, **options):
-        found = 0
         self.options = options
         
         worldid = options['worldid'][0]
@@ -25,6 +24,8 @@ class Command(BaseCommand):
             worldid = world.pk
         else: 
             world = Thing.objects.get(pk=worldid)
+            
+        print 'World %s' % world.pk
         
         case = options['case'][0]
         
@@ -107,7 +108,7 @@ class Command(BaseCommand):
         engine = WorldEngine()
         abot = Thing.objects.filter(module='bot').first()
         if abot:
-            print 'bot %s' % abot.pk
+            print 'bot %s %s' % (abot.pk, abot.name)
             for i in xrange(1000):
                 print i
                 engine.action(targetid=world.pk, action='walk', actorid=abot.pk, angle=random())

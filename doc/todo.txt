@@ -1,6 +1,10 @@
+
 Optimisation:
     80% of the time is spent on the server side
     
+
+python -m cProfile -o s2.cperf manage.py utest any pactions
+pyprof2calltree -k -i s2.cperf
 
 mind:
     implement basic NN for action selection
