@@ -23,6 +23,10 @@ class Command(BaseCommand):
             self.compile()
             found = 1
 
+        if action == 'reindex':
+            self.reindex()
+            found = 1
+
         if not found:
             print 'ERROR: action not found (%s)' % action
         
@@ -35,5 +39,12 @@ class Command(BaseCommand):
         world = Thing.new(module='world')
         print world._generate_actions()
         print world.get_actions()
+        
+    def reindex(self):
+        thing = Thing()
+        q = thing.objects.all()
+        q.create_index('parentid', unique=False)
+        q.create_index('rootid', unique=False)
+        q.create_index('module', unique=False)
         
     

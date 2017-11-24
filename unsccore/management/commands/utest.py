@@ -4,6 +4,7 @@ from unsccore.things.thing import Thing, ThingParentError
 from unsccore.things.world import World
 from unsccore import mogels
 import time
+from unsccore.engine import WorldEngine
 
 class Command(BaseCommand):
     help = 'Unscripted core management commands'
@@ -23,8 +24,8 @@ class Command(BaseCommand):
         world = Thing.objects.get(pk=worldid)
         found = 0
         
-        if case == 'compile':
-            self.compile()
+        if case == 'pactions':
+            self.pactions(world)
             found = 1
 
         if case == 'repop_fitness':
@@ -96,8 +97,11 @@ class Command(BaseCommand):
             
         return cycle
     
-    def compile(self):
-        Thing.cache_actions()
+    def pactions(self, world):
+        engine = WorldEngine()
+        for i in xrange(1000):
+            print i
+            engine.action(targetid=world.pk, action='pass', actorid='5a163a9e274d0a51189b5b4a')
     
     def simulate(self, world):
         from unscbot.models import Bot

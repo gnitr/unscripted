@@ -90,6 +90,20 @@ class MongoQuerySet(object):
         
     def reset_query(self):
         self.query = {'filters': {}, 'order': None}
+        
+    def remove_ghost_records(self):
+        print self.count()
+        i = 0
+        for thing in self.all():
+            i += 1
+            print i, thing.pk, thing.created
+
+    def create_index(self, akeys, unique=False):
+        collection = self._get_collection()
+        name = 'idx_%s' % akeys
+        collection.create_index(akeys, unique=unique, name=name)
+#         for idx in collection.list_indexes():
+#             print idx
     
     def clone(self):
         import copy
@@ -97,15 +111,6 @@ class MongoQuerySet(object):
         ret.query = copy.deepcopy(self.query)
         return ret
     
-    def __iter__(self):
-        return self.clone()
-    
-    def next(self):
-        cursor = self._get_cursor()
-        doc = cursor.next()
-        ret = self.doc_class.new(**doc)
-        return ret
-
     @classmethod
     def _get_db(cls):
         if not cls._db:
@@ -131,33 +136,51 @@ class MongoQuerySet(object):
             ret.query['filters'].update(filters)
         return ret
     
-    def __getitem__(self, key):
-        # can raise IndexError
-        cursor = self._get_cursor()
-        return self.doc_class.new(**cursor[key])
-    
     def get(self, **filters):
         docs = self.filter(**filters)
-        c = docs.count()
-        if c == 0:
+        ret = docs.first()
+        if ret is None:
             raise ObjectDoesNotExist('Thing not found (%s)' % repr(filters))
-        if c > 1:
-            raise MultipleObjectsReturned()
-        return docs[0]
         
+        return ret
+        
+    def count(self):
+        return self._get_cursor().count()
 
     def order_by(self, key):
         self.query['order'] = key
         return self
     
     def first(self):
-        ret = None
+        return self._get_next(1)
+#         ret = None
+#         cursor = self._get_cursor()
+#         cursor.limit(1)
+#         cursor.next()
+#         try:
+#             ret = self.doc_class.new(**cursor[0])
+#         except IndexError, e:
+#             pass
+#         return ret
+    
+    def __iter__(self):
+        return self.clone()
+    
+    def next(self):
+        return self._get_next()
+    
+    def _get_next(self, limit=0):
         cursor = self._get_cursor()
-        try:
-            ret = self.doc_class.new(**cursor[0])
-        except IndexError, e:
-            pass
+        if limit:
+            cursor.limit(limit)
+        doc = cursor.next()
+        ret = self.doc_class.new(**doc)
         return ret
+
+    def __getitem__(self, key):
+        # can raise IndexError
+        cursor = self._get_cursor()
+        return self.doc_class.new(**cursor[key])
     
     def _get_collection(self):
         # TODO: cache?
@@ -176,6 +199,7 @@ class MongoQuerySet(object):
 
             ## print 'MONGO FIND (%s)' % repr(filters)
             self.cursor = collection.find(filters)
+            #self.cursor.batch_size(100)
                 
             if self.query['order']:
                 orders = []
@@ -188,6 +212,7 @@ class MongoQuerySet(object):
                 self.cursor.sort(orders)
             
             self.query_executed_hash = query_hash
+            
         return self.cursor
 
     def _mongo_replace_one(self, model):
@@ -201,9 +226,6 @@ class MongoQuerySet(object):
     def _mongo_delete_one(self, model):
         doc = model._get_mongo_dict()
         self._get_collection().delete_one({'_id': doc['_id']})
-
-    def count(self):
-        return self._get_cursor().count()
 
 class MongoModel(object):
     '''
