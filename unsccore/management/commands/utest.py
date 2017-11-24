@@ -23,6 +23,10 @@ class Command(BaseCommand):
         world = Thing.objects.get(pk=worldid)
         found = 0
         
+        if case == 'compile':
+            self.compile()
+            found = 1
+
         if case == 'repop_fitness':
             self.repop(world, [20,1,20])
             found = 1
@@ -91,6 +95,9 @@ class Command(BaseCommand):
             self.t0 = time.time()
             
         return cycle
+    
+    def compile(self):
+        Thing.cache_actions()
     
     def simulate(self, world):
         from unscbot.models import Bot

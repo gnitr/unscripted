@@ -1,5 +1,7 @@
 from unsccore import mogels
 from bson.objectid import ObjectId
+from django.core.cache import cache
+import json
 
 class ThingParentError(Exception):
     pass
@@ -162,18 +164,62 @@ class Thing(mogels.MongoDocumentModule):
         return ret
     
     def get_api_dict(self):
-        import inspect
         ret = super(Thing, self).get_api_dict()
+        #ret['actions'] = self._generate_actions()
+        ret['actions'] = self.get_actions()
+        return ret
+    
+    @classmethod
+    def get_actions(cls):
+        '''Get the list of actions for this Thing. Read from disk cache, then 
+        cache it in class variable.'''
         
-        ret['actions'] = []
-        for method_name in dir(self):
-            method = getattr(self, method_name)
+        k = '_actions'
+        ret = getattr(Thing, k, None)
+        
+        if ret is None:
+            #print 'read from disk cache'
+            ret = json.loads(cache.get('actions', '{}'))
+            if ret:
+                setattr(Thing, k, ret)
+
+        ret = ret.get(cls.get_module_key(), [])
+        
+        return ret
+        
+    @classmethod
+    def cache_actions(cls):
+        '''Cache all the actions from all the types of things'''
+        import json
+        import os
+        ret = {}
+        
+        for afile in os.listdir(os.path.dirname(__file__)):
+            if afile.endswith('.py'):
+                module_key = afile.replace('.py', '')
+                if module_key == '__init__': continue
+                thing_class = cls.get_class_from_module_key(module_key)
+                ret[module_key] = thing_class._generate_actions()
+        
+        cache.set('actions', json.dumps(ret))
+        
+        return ret
+
+    @classmethod
+    def _generate_actions(cls):
+        '''Generate the list of actions supported by this type of Thing'''
+        import inspect
+        ret = []
+        
+        for method_name in dir(cls):
+            method = getattr(cls, method_name)
             if inspect.ismethod(method):
                 margs = inspect.getargspec(method)
                 if len(margs) > 1 and margs.args[0:2] == ['self', 'actor']:
                     action = {k: 0.0 for k in margs.args[2:]}
                     action['action'] = method_name
-                    ret['actions'].append(action)
+                    ret.append(action)
         
         return ret
     
+        
