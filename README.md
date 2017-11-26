@@ -59,7 +59,7 @@ That's 10mx10m world with 10 bots and 2 wells.
 * optimisations of the server-side framework to cope with large number of actions
 * add a backend system to manage collection of things: mongodb, in-memory (pymemdb) and api-client (apidb)
 
-This stage is necessary as I realised that the engine on the server-side is extremely slow. We want the bots to live many times faster than in real time otherwise it will take years to see an emerence of adaptation. Read the discussion in the Wiki.
+This stage is necessary as I realised that the engine on the server-side is extremely slow. We want the bots to live many times faster than in real time otherwise it will take years to see an emerence of adaptation. Read the discussion about [the speed of virtual life in the Wiki](https://github.com/gnitr/unscripted/wiki/The-Speed-of-Life-&-Learning).
 
 ## 0.4: Adaptive Mind (starting Dec 2017)
 
