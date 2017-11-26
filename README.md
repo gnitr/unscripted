@@ -3,6 +3,7 @@
 * **Description**: a naive proof-of-concept for a collaborative online virtual world to experiment with unscripted bots
 * **Primary Objective**: experiment with of adaptive, artificial human-like agents (0 prior knowledge about world, no training data, general purpose, 100% algorithmically controlled); a sort of artificial general intelligence
 * **Secondary**: Let's see what happens when we let bots live their own life, reproduce, survive, thrive and create their own stories.
+* **Managing expecations**: **Although the ideas and aims are ambitious this prototype is extremely low-key, minimalistic and rudimentary**. You've got to use your imagination, look at the potential rather than what can be actually achieved with this code.
 * **Focus**: 
   * unscripted behaviour rather than high level intelligence and optimal solution solving
   * life-long and generational evolutions rather than adult-born bots
