@@ -26,11 +26,20 @@ def get_collection_size_info(docs, serialised):
 
 class Collection(object):
     
-    def __init__(self):
+    _collections = {}
+    
+    @classmethod
+    def get_collection(cls, key):
+        ret = cls._collections.get(key)
+        if ret is None:
+            ret = cls._collections[key] = Collection(key)
+        return ret
+    
+    def __init__(self, key):
         # TODO: use dynamic name for collection
-        self.key = 'things'
+        self.key = key
         if not self.lock():
-            raise Exception('Another process/thread is already using the collection')
+            raise Exception(self.lock_error)
         self.load()
         
         atexit.register(lambda: self.save())
@@ -48,19 +57,22 @@ class Collection(object):
         ptcid = '%s:%s:%s' % (pid, tid, cid)
         ptcid_last = cache.get(self.key + '.ptid', '123:1:1')
         if ptcid_last != ptcid:
+            ret = False
             # last owner different from us, check if process still alive
             ptcid_last = ptcid_last.split(':')
             import psutil
             try:
                 proc = psutil.Process(int(ptcid_last[0]))
-                if proc.status() not in [psutil.STATUS_DEAD, psutil.STATUS_ZOMBIE]: 
-                    ret = False
+                if proc.status() in [psutil.STATUS_DEAD, psutil.STATUS_ZOMBIE]: 
+                    ret = True
             except NoSuchProcess:
-                pass
+                ret = True
         if ret:
             cache.set(self.key + '.ptid', ptcid)
             
-        return ret
+        self.lock_error = 'Another process/thread is already using the collection (us: %s; them: %s)' % (ptcid, ptcid_last)
+            
+        return ret 
 
     def save(self):
         content = dumps(self._id_docs)
@@ -139,13 +151,13 @@ class MongoQuerySet(object):
     A pymongo query builder and cursor over a result 
     that implements some of the django QuerySet interface.
     '''
-    _collection = Collection()
     
     def __init__(self, doc_class):
         '''
         doc_class: MongoModel or subclass. Used as a default to instantiate 
         a Mongo Document. 
         '''
+        self._collection = Collection.get_collection('things')
         self.doc_class = doc_class
         # a hash of the last query executed on Mongo by this QuerySet 
         self.query_executed_hash = None
