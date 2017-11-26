@@ -25,7 +25,11 @@ class Command(BaseCommand):
         worldid = options['worldid'][0]
         if worldid == 'any':
             world = World.objects.first()
-            worldid = world.pk
+            if world:
+                worldid = world.pk
+            else:
+                print 'ERROR: no world found'
+                exit()
         elif worldid in ['new', 'tmp']:
             world = World()
             self.repop_well(world)

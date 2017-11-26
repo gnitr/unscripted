@@ -1,5 +1,14 @@
 from bson.objectid import ObjectId
 import re
+import os
+
+def get_pid():
+    return os.getpid()
+
+def is_process_active(pid):
+    path = '/proc/%s' % pid
+    ret = os.path.exists(path)
+    return ret
 
 def get_threadid():
     import threading

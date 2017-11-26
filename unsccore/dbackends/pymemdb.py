@@ -12,7 +12,6 @@ from django.core.cache import cache
 from bson.json_util import dumps, loads
 import utils as dbutils
 import json
-from psutil import NoSuchProcess
 
 class CollectionInsertedResponse(object):
     
@@ -60,13 +59,7 @@ class Collection(object):
             ret = False
             # last owner different from us, check if process still alive
             ptcid_last = ptcid_last.split(':')
-            import psutil
-            try:
-                proc = psutil.Process(int(ptcid_last[0]))
-                if proc.status() in [psutil.STATUS_DEAD, psutil.STATUS_ZOMBIE]: 
-                    ret = True
-            except NoSuchProcess:
-                ret = True
+            ret = not dbutils.is_process_active(ptcid_last[0])
         if ret:
             cache.set(self.key + '.ptid', ptcid)
             
