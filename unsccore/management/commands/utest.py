@@ -22,6 +22,11 @@ class Command(BaseCommand):
         if worldid == 'any':
             world = World.objects.first()
             worldid = world.pk
+        elif worldid in ['new', 'tmp']:
+            world = World()
+            self.repop_well(world)
+            world.save()
+            worldid = world.pk
         else: 
             world = Thing.objects.get(pk=worldid)
             
@@ -53,6 +58,10 @@ class Command(BaseCommand):
 
         if not found:
             print 'ERROR: Test case not found (%s)' % case
+            
+        if options['worldid'][0] in ['tmp']:
+            print 'delete world %s' % world.pk
+            world.delete()
         
         print 'done'
         
@@ -72,6 +81,7 @@ class Command(BaseCommand):
     
     def repop_well(self, world):
         world.set_dims([10, 10, 10])
+        world.save()
         self.repop(world)
         world.save()
 
@@ -106,10 +116,20 @@ class Command(BaseCommand):
     
     def pactions(self, world):
         engine = WorldEngine()
-        abot = Thing.objects.filter(module='bot').first()
+        
+        abot = Thing.objects.filter(module='bot', rootid=world.pk).first()
+        
+        if abot is None:
+            print 'ERROR: this world has no bot'
+            return
+        
+        print abot.pos
+        
+        limit = self.options.get('cycles') or 10
+
         if abot:
             print 'bot %s %s' % (abot.pk, abot.name)
-            for i in xrange(1000):
+            for i in xrange(limit):
                 print i
                 engine.action(targetid=world.pk, action='walk', actorid=abot.pk, angle=random())
     

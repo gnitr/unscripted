@@ -1,6 +1,7 @@
 from unsccore import mogels
 from bson.objectid import ObjectId
 from django.core.cache import cache
+from unsccore.dbackends.utils import ClassProperty
 import json
 
 class ThingParentError(Exception):
@@ -61,7 +62,7 @@ class Thing(mogels.MongoDocumentModule):
             ret.reset_query()
         return ret
 
-    objects = mogels.ClassProperty(get_objects)
+    objects = ClassProperty(get_objects)
     
     def get_parent(self):
         return Thing.objects.get(pk=self.parentid) if self.parentid else None

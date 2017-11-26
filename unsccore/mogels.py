@@ -1,242 +1,7 @@
-from django.conf import settings
-import pymongo
-import re
-import json
 from datetime import datetime
-from bson.objectid import ObjectId
-from django.core.exceptions import ObjectDoesNotExist
-
-def get_class_name_from_module_key(module_key):
-    ''' my_class -> MyClass '''
-    return re.sub(r'((^|_)[a-z])', lambda m: m.group(1).upper(), module_key.lower()).replace('_', '')
-
-def get_key_from_class_name(class_name):
-    ''' MyClass -> my_class'''
-    return re.sub(r'([A-Z])', r'_\1', class_name).strip('_').lower()
-
-def get_mongo_dict_from_model(model):
-    ret = _get_mongo_dict_from_model_dict(model.__dict__)
-    # A bit special, .module is a class variable and therefore not part 
-    # of __dict__, it's thus treated slightly differently.
-    ret['module'] = model.module
-    return ret
-
-# dictionary conversion among 
-# Mongo DB document, Django Model __dict__ and Web API json dict
-def _get_mongo_dict_from_model_dict(d):
-    ret = {}
-    for k, v in d.iteritems():
-        if callable(v): 
-            print 'CALLABLE %s %s' % (k, v)
-        if k.startswith('_'): continue
-        if k == 'pk':
-            k = '_id'
-        if k == '_id' and v is None:
-            continue
-        if isinstance(v, dict):
-            v = _get_mongo_dict_from_model_dict(v)
-        elif isinstance(v, basestring) and len(v) == len('59ea5544274d0a2924d8b06b') and k.endswith('id'):
-            v = ObjectId(v)
-        ret[k] = v
-    return ret
-
-def get_model_dict_from_mongo_dict(d):
-    ret = {}
-    for k, v in d.iteritems():
-        if k == 'module':
-            # .module is derived from the model class (Bot.module = 'bot')
-            continue
-        if k == '_id':
-            k = 'pk'
-        if k.startswith('_'): continue
-        if isinstance(v, dict):
-            v = get_model_dict_from_mongo_dict(v)
-        elif isinstance(v, ObjectId):
-            v = str(v)
-        ret[k] = v
-    return ret
-
-def get_api_dict_from_model(model):
-    ret = _get_api_dict_from_model_dict(model.__dict__)
-    ret['module'] = model.module
-    return ret
-    
-def _get_api_dict_from_model_dict(d):
-    ret = {}
-    for k, v in d.iteritems():
-        if k == 'pk':
-            k = 'id'
-        if k.startswith('_'): continue
-        if isinstance(v, dict):
-            v = _get_api_dict_from_model_dict(v)
-        ret[k] = v
-    return ret
-
-def get_model_dict_from_api_dict(d):
-    ret = {}
-    for k, v in d.iteritems():
-        if k == 'id':
-            k = 'pk'
-        if k.startswith('_'): continue
-        if isinstance(v, dict):
-            v = get_model_dict_from_api_dict(v)
-        ret[k] = v
-    return ret
-
-class ClassProperty(property):
-    def __get__(self, cls, owner):
-        return self.fget.__get__(None, owner)()
-
-class MongoQuerySet(object):
-    '''
-    A pymongo query builder and cursor over a result 
-    that implements some of the django QuerySet interface.
-    '''
-    
-    _client = None
-    _db = None
-    
-    def __init__(self, doc_class):
-        '''
-        doc_class: MongoModel or subclass. Used as a default to instantiate 
-        a Mongo Document. 
-        '''
-        self.doc_class = doc_class
-        # a hash of the last query executed on Mongo by this QuerySet 
-        self.query_executed_hash = None
-        self.reset_query()
-        
-    def reset_query(self):
-        self.query = {'filters': {}, 'order': None}
-        
-    def remove_ghost_records(self):
-        print self.count()
-        i = 0
-        for thing in self.all():
-            i += 1
-            print i, thing.pk, thing.created
-
-    def create_index(self, akeys, unique=False):
-        collection = self._get_collection()
-        name = 'idx_%s' % akeys
-        collection.create_index(akeys, unique=unique, name=name)
-    
-    def clone(self):
-        import copy
-        ret = MongoQuerySet(self.doc_class)
-        ret.query = copy.deepcopy(self.query)
-        return ret
-    
-    @classmethod
-    def _get_db(cls):
-        if not cls._db:
-            cls._client = pymongo.MongoClient('mongodb://%s:%s/' % (
-                settings.DB_THINGS['HOST'],
-                settings.DB_THINGS['PORT']
-            ))
-            cls._db = cls._client[settings.DB_THINGS['NAME']]
-        return cls._db
-
-    def create(self, **kwargs):
-        obj = self.doc_class.new(**kwargs)
-        obj.save()
-        return obj
-    
-    def all(self):
-        # TODO: reset query?
-        ret = self.clone()
-        return ret
-
-    def filter(self, **filters):
-        ret = self.clone()
-        if filters:
-            ret.query['filters'].update(filters)
-        return ret
-    
-    def first(self):
-        try:
-            return self._get_next(1)
-        except StopIteration:
-            return None
-    
-    def get(self, **filters):
-        docs = self.filter(**filters)
-        ret = docs.first()
-        if ret is None:
-            raise ObjectDoesNotExist('Thing not found (%s)' % repr(filters))
-        
-        return ret
-        
-    def count(self):
-        return self._get_cursor().count()
-
-    def order_by(self, key):
-        self.query['order'] = key
-        return self
-    
-    def __iter__(self):
-        return self.clone()
-    
-    def next(self):
-        return self._get_next()
-    
-    def _get_next(self, limit=0):
-        cursor = self._get_cursor()
-        if limit:
-            cursor.limit(limit)
-        doc = cursor.next()
-        ret = self.doc_class.new(**doc)
-        return ret
-
-    def __getitem__(self, key):
-        # can raise IndexError
-        cursor = self._get_cursor()
-        return self.doc_class.new(**cursor[key])
-    
-    def _get_collection(self):
-        # TODO: cache?
-        ret = self._get_db()[self.doc_class.Meta.db_table]
-        return ret
-    
-    def _get_cursor(self, reset=False):
-        query_hash = json.dumps(self.query)
-        if reset or query_hash != self.query_executed_hash:
-            collection = self._get_collection()
-            # TODO: query
-            
-            filters = _get_mongo_dict_from_model_dict(self.query['filters'])
-            # TODO: works for simple care field=value
-            # but need to convert django operators to mongo
-
-            ## print 'MONGO FIND (%s)' % repr(filters)
-            self.cursor = collection.find(filters)
-            #self.cursor.batch_size(100)
-                
-            if self.query['order']:
-                orders = []
-                for field in [self.query['order']]:
-                    if field == 'pk': field = '_id'
-                    field_name = field.strip('-')
-                    order = [field_name, pymongo.ASCENDING]
-                    if field_name != field: order[1] = pymongo.DESCENDING
-                    orders.append(order)
-                self.cursor.sort(orders)
-            
-            self.query_executed_hash = query_hash
-            
-        return self.cursor
-
-    def _mongo_replace_one(self, model):
-        collection = self._get_collection()
-        doc = model._get_mongo_dict()
-        if doc.get('_id'):
-            collection.replace_one({'_id': doc['_id']}, doc)
-        else:
-            model.pk = str(collection.insert_one(doc).inserted_id)
-
-    def _mongo_delete_one(self, model):
-        doc = model._get_mongo_dict()
-        self._get_collection().delete_one({'_id': doc['_id']})
+from dbackends import utils as dbutils
+#from dbackends.mongodb import MongoQuerySet
+from dbackends.pymemdb import MongoQuerySet 
 
 class MongoModel(object):
     '''
@@ -280,23 +45,23 @@ class MongoModel(object):
         self.objects._mongo_delete_one(self)
 
     def _set_mongo_dict(self, doc):
-        for k, v in get_model_dict_from_mongo_dict(doc).iteritems():
+        for k, v in dbutils.get_model_dict_from_mongo_dict(doc).iteritems():
             setattr(self, k, v)
 
     def _get_mongo_dict(self):
-        return get_mongo_dict_from_model(self)
+        return dbutils.get_mongo_dict_from_model(self)
     
     def get_api_dict(self):
-        return get_api_dict_from_model(self)
+        return dbutils.get_api_dict_from_model(self)
     
-    objects = ClassProperty(get_objects)
+    objects = dbutils.ClassProperty(get_objects)
 
 class MongoDocumentModuleMeta(type):
     '''Used as a cache for optimisation purpose'''
 
     def __init__(cls, name, bases, dct):
         super(MongoDocumentModuleMeta, cls).__init__(name, bases, dct)
-        cls.module = get_key_from_class_name(cls.__name__)
+        cls.module = dbutils.get_key_from_class_name(cls.__name__)
     
 class MongoDocumentModule(MongoModel):
     '''
@@ -337,7 +102,7 @@ class MongoDocumentModule(MongoModel):
             import importlib
             try:
                 module = importlib.import_module('.'+module_key, 'unsccore.things')
-                ret = getattr(module, get_class_name_from_module_key(module_key), None)
+                ret = getattr(module, dbutils.get_class_name_from_module_key(module_key), None)
                 cls._ccache['modules_class'][module_key] = ret
             except ImportError:
                 pass
@@ -350,7 +115,7 @@ class MongoDocumentModule(MongoModel):
         ret = ret.filter(module=cls.module)
         return ret
 
-    objects = ClassProperty(get_objects)
+    objects = dbutils.ClassProperty(get_objects)
 
 #     @classmethod
 #     def get_module_key(cls):

@@ -1,6 +1,40 @@
 
 Optimisation:
-    80% of the time is spent on the server side
+    From top (algo/caching/avoidance) / from bottom (alternatives)
+    
+    django channels?
+    
+    80% of the time is spent on the server side (look at top during execution)
+    socket
+        better library?
+
+    mongdb tuning?
+    
+    Single-thread?!
+        we queue all requests on server side.
+        - we can't parallelise the requests
+        + dramatically simplifies the database: all objects are pythons and stay in memory
+        + no need to worry about sharing, locking, race conditions, ...
+        + no latency due to with python - db communications
+        0 we must manage persistance
+        - only feasible for small worlds
+        - every Write HAS to go via the same instance
+        - lacks all the nice database stuff like advanced queries, GUIs, libs...
+            => can persists as MongoDB
+    
+    * multiprocess / multithread?
+        runserver already has 4 workers!
+        nginx?
+    
+    algo
+        is_position_valid
+        obstructing
+    
+    * in memory db:
+        mongodb ramdisk 
+        python objects shared in memory
+            how do we keep them thread-safe?
+        
     
 
 python -m cProfile -o s2.cperf manage.py utest any pactions

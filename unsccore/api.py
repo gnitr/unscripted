@@ -25,11 +25,14 @@ class UnscriptedAPI(object):
         self.path = path
         self.method = request.GET.get('@method', request.method).upper()
         
+        from mogels import MongoQuerySet
+        
         self.response = OrderedDict([
             ['version', self.get_major_version()],
             ['context', request.GET.get('context', '')],
             ['id', uuid.uuid4().hex],
             ['method', ''],
+            ['backend', str(MongoQuerySet.__module__)],
             ['params', request.GET],
             ['data', {}],
         ])
