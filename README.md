@@ -53,13 +53,18 @@ That's 10mx10m world with 10 bots and 2 wells.
 * new bots replace dead ones
 * bots still chose actions randomly
 
-## 0.3: Attempts at adaptation (starting Nov 2017)
+## 0.3: Optimisations (started Nov 2017)
+
+* simple tester to run continuous simulation of a small population and measure performance
+* optimisations of the server-side framework to cope with large number of actions
+* add a backend system to manage collection of things: mongodb, in-memory (pymemdb) and api-client (apidb)
+
+## 0.4: Adaptive Mind (starting Dec 2017)
 
 * create a very basic but working model of a bot mind, possibly neural net
 * introduce a basic mechanism for allowing adaptation
-* some level of optimisations
 
-## 0.4: Genetic transmission
+## 0.5: Genetic transmission
 
 * genome = a serialised mind
 * species = a type of model for a mind and its serialisation format
@@ -68,7 +73,7 @@ That's 10mx10m world with 10 bots and 2 wells.
 
 Those simple ingredients should be enough trigger the evolutionary process. This is when things starts to become really interesting and move in many directions.
 
-## 0.5: Public Demo
+## 0.6: Public Demo
 
 * keep revising and optimising the system until we can see the emergence and transmission of behaviours
 * add complexity to the world (other situations, resources, things)
