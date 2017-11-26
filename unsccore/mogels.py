@@ -10,6 +10,9 @@ def set_backend(module_name):
     module = importlib.import_module('.'+module_name, 'unsccore.dbackends')
     QUERYSET = module.MongoQuerySet
     print 'UNSCRIPTED BACKEND = %s' % str(QUERYSET.__module__)
+    
+def get_backend():
+    return QUERYSET
 
 set_backend(settings.UNSCRIPTED_ENGINE_BACKEND)
 

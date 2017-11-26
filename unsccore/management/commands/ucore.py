@@ -12,7 +12,6 @@ class Command(BaseCommand):
         parser.add_argument('action', metavar='action', nargs=1, type=str)
 
     def handle(self, *args, **options):
-        found = 0
         self.options = options
         
         action = options['action'][0]

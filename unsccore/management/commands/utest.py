@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 from unsccore.things.thing import Thing, ThingParentError
 from unsccore.things.world import World
 from unsccore import mogels
+from unsccore.api_client import API_Client
 import time
 from unsccore.engine import WorldEngine
 from random import random
@@ -17,6 +18,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         #mogels.set_backend('mongodb')
+        self.api = API_Client()
         
         self.options = options
         
@@ -38,6 +40,14 @@ class Command(BaseCommand):
         
         found = 0
         
+        if case == 'api':
+            api = API_Client()
+            res = api.get_things()
+            
+            print res
+            
+            found = 1
+
         if case == 'pactions':
             self.pactions(world)
             found = 1
@@ -151,7 +161,7 @@ class Command(BaseCommand):
                 break
             
             print 'Cycle: %s' % cycle
-            botids = [t.pk for t in Thing.objects.filter(module='bot', parentid=world.pk).order_by('pk')]
+            botids = sorted([t['id'] for t in self.api.get_things(module='bot', parentid=world.pk)])
         
             if not botids:
                 break

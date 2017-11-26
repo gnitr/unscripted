@@ -5,11 +5,13 @@ from django.db import models
 from random import random, randint
 import requests
 import json
+from unsccore.api_client import API_Client
 
 # Create your models here.
 class Bot(object):
     
     def __init__(self, botid):
+        self.api = API_Client()
         self.botid = botid
         self.items = []
         
@@ -59,35 +61,17 @@ class Bot(object):
         
         # https://stackoverflow.com/questions/17301938/making-a-request-to-a-restful-api-using-python
         kwargs['actorid'] = self.botid
-        import urllib
-        qs = urllib.urlencode(kwargs)
-        url = 'http://localhost:8000/api/1/things/%s/actions/%s?%s' % (targetid, action, qs)
-        print url
         
-        res = None
-        try:
-            res = requests.get(url)
-        except requests.exceptions.ConnectionError:
-            # fails silently
-            pass
+        items = self.api.action(targetid, action, **kwargs)
         
-        if res and res.ok:
-            res_content = json.loads(res.content)
-            
-            if res_content['data']:
-                self.items = res_content['data']['items']
-                for item in self.items:
-                    if item['module'] == 'world':
-                        self.world = item
-                    if item['id'] == self.botid:
-                        self.data = item
-                ret = True
-            else:
-                print 'WARNING: interaction error %s' % res_content['error']
-        else:
-            if res:
-                print 'WARNING: API request error %s' % res.status_code
-            else:
-                print 'WARNING: API connection error'
+        if items:
+            self.items = items
+            for item in self.items:
+                if item['module'] == 'world':
+                    self.world = item
+                if item['id'] == self.botid:
+                    self.data = item
+            ret = True
         
         return ret
+    
