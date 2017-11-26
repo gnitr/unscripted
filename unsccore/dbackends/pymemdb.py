@@ -12,6 +12,7 @@ from django.core.cache import cache
 from bson.json_util import dumps, loads
 import utils as dbutils
 import json
+from psutil import NoSuchProcess
 
 class CollectionInsertedResponse(object):
     
@@ -20,27 +21,56 @@ class CollectionInsertedResponse(object):
 
 import atexit
 
-def exit_handler():
-    MongoQuerySet._collection.save()
-
-atexit.register(exit_handler)
+def get_collection_size_info(docs, serialised):
+    return '%s things, %.4f MB' % (len(docs), len(serialised) / 1024.0 / 1024)
 
 class Collection(object):
     
     def __init__(self):
         # TODO: use dynamic name for collection
         self.key = 'things'
+        if not self.lock():
+            raise Exception('Another process/thread is already using the collection')
         self.load()
         
+        atexit.register(lambda: self.save())
+    
+    def lock(self):
+        '''Returns False if another running thread is using this collection.
+        Only one thread/process can change the collection at any time.
+        If returns True this process/thread will lock the collection.
+        '''
+        ret = True
+        import os
+        pid = os.getpid()
+        tid = dbutils.get_threadid()
+        cid = id(self)
+        ptcid = '%s:%s:%s' % (pid, tid, cid)
+        ptcid_last = cache.get(self.key + '.ptid', '123:1:1')
+        if ptcid_last != ptcid:
+            # last owner different from us, check if process still alive
+            ptcid_last = ptcid_last.split(':')
+            import psutil
+            try:
+                proc = psutil.Process(int(ptcid_last[0]))
+                if proc.status() not in [psutil.STATUS_DEAD, psutil.STATUS_ZOMBIE]: 
+                    ret = False
+            except NoSuchProcess:
+                pass
+        if ret:
+            cache.set(self.key + '.ptid', ptcid)
+            
+        return ret
+
     def save(self):
         content = dumps(self._id_docs)
         cache.set(self.key, content)
-        print 'COLLECTION WRITTEN'
+        print 'COLLECTION WRITTEN (%s)' % (get_collection_size_info(self._id_docs, content))
         
     def load(self):
-        content = cache.get(self.key)
-        self._id_docs = loads(content or '{}') or {}
-        print 'COLLECTION READ'
+        content = cache.get(self.key) or '{}'
+        self._id_docs = loads(content)
+        print 'COLLECTION READ (%s)' % (get_collection_size_info(self._id_docs, content))
     
     def find(self, query):
         ret = []

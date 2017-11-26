@@ -1,7 +1,17 @@
 from datetime import datetime
 from dbackends import utils as dbutils
-#from dbackends.mongodb import MongoQuerySet
-from dbackends.pymemdb import MongoQuerySet 
+from django.conf import settings
+
+QUERYSET = None
+
+def set_backend(module_name):
+    global QUERYSET
+    import importlib
+    module = importlib.import_module('.'+module_name, 'unsccore.dbackends')
+    QUERYSET = module.MongoQuerySet
+    print 'UNSCRIPTED BACKEND = %s' % str(QUERYSET.__module__)
+
+set_backend(settings.UNSCRIPTED_ENGINE_BACKEND)
 
 class MongoModel(object):
     '''
@@ -35,8 +45,7 @@ class MongoModel(object):
 
     @classmethod
     def get_objects(cls):
-        ret = MongoQuerySet(cls)
-        return ret
+        return QUERYSET(cls)
     
     def save(self):
         self.objects._mongo_replace_one(self)

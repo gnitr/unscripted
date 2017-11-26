@@ -16,6 +16,8 @@ class Command(BaseCommand):
         parser.add_argument('--cycles', nargs='?', type=int)
 
     def handle(self, *args, **options):
+        mogels.set_backend('mongodb')
+        
         self.options = options
         
         worldid = options['worldid'][0]

@@ -1,6 +1,11 @@
 from bson.objectid import ObjectId
 import re
 
+def get_threadid():
+    import threading
+    thread = threading.currentThread()
+    return thread.ident
+
 class ClassProperty(property):
     def __get__(self, cls, owner):
         return self.fget.__get__(None, owner)()
