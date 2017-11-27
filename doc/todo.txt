@@ -2,6 +2,7 @@ Optimisation:
     Observations:
         pactions is much slower when look at the iterations on screen, why?
 
+        (sudo apt-get install libpcre3 libpcre3-dev # may be needed for uwsgi)
         uwsgi --ini uwsgi.ini
         time pm utest any conn --cycles 10000
         # 0.5M / s: loop with just print
