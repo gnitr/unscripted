@@ -87,10 +87,10 @@ DATABASES = {
 }
 
 DB_THINGS = {
-    'ENGINE':   'pymongo',
-    'NAME':     'unscripted',
-    'HOST':     'localhost',
-    'PORT':     '27017',
+    'ENGINE': 'pymongo',
+    'NAME': 'unscripted',
+    'HOST': 'localhost',
+    'PORT': '27017',
 }
 
 
@@ -137,6 +137,7 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': os.path.join(BASE_DIR, 'cache', 'default'),
+        'TIMEOUT': None,
     }
 }
 

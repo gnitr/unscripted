@@ -1,7 +1,18 @@
-
 Optimisation:
     Observations:
         pactions is much slower when look at the iterations on screen, why?
+
+        uwsgi --ini uwsgi.ini
+        time pm utest any conn --cycles 10000
+        # 0.5M / s: loop with just print
+        # 3M / s  : > /dev/null 
+        # 20M / s : without print 
+        #
+        # 410 / s : empty requests + print (runserver)
+        # 483 / s : empty requests (runserver)
+        # 550 / s : empty requests (uwsgi) (60% in client-side) => runserver speed varies a lot (300 to 900)
+        # 1550 / s: request with PyCurl (80% in server-side) => triples the speed of the client
+        # 1000 * 10 simulation reqs / 47s => 212 / s
 
     From top (algo/caching/avoidance) / from bottom (alternatives)
     

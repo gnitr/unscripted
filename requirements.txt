@@ -7,3 +7,5 @@ requests==2.18.4
 #http://download.pytorch.org/whl/cu80/torch-0.2.0.post3-cp27-cp27mu-manylinux1_x86_64.whl
 #torchvision
 names
+# sudo apt-get install libcurl4-openssl-dev
+pycurl
