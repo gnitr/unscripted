@@ -85,7 +85,11 @@ class UnscriptedAPI(object):
         api_method = None
         data_items = []
         data = {}
-        request_filters = {k: v for k, v in self.request.GET.iteritems() if not k.startswith('@')}
+        request_filters = {}
+        for k, v in self.request.GET.iteritems():
+            if k.startswith('@'): continue
+            if k == 'id': k = 'pk'
+            request_filters[k] = v
         
         if len(parts) < 1:
             api_method = 'api.get'
@@ -119,52 +123,95 @@ class UnscriptedAPI(object):
                 params = {k:v for k, v in self.request.GET.iteritems()}
                 things = engine.action(targetid=parentid, action=action, **params)
             else:
-                module = self.get_singular(resource_type)
-                athing = Thing.new(module=module, parentid=parentid)
-            
-            if athing:
-                thingid = parts.pop(0) if parts else None
-                things = athing.__class__.objects.filter(**request_filters)
+                if parts:
+                    request_filters['pk'] = parts.pop(0)
+                if resource_type and resource_type != 'things':
+                    request_filters['module'] = self.get_singular(resource_type)
+                if request_filters.get('module') == 'thing':
+                    del request_filters['module']
                 if parentid:
-                    things = things.filter(parentid=parentid)
+                    request_filters['parentid'] = parentid
+
+                print request_filters
+
+                if self.method in ['GET', 'DELETE']:
                     
-                if thingid:
                     api_method = '%s.get' % resource_type
-                    try:
-                        things = [things.get(pk=thingid)]
-                    except ObjectDoesNotExist:
-                        # IMPORTANT: without this, /things/ID/?@method=DELETE  
-                        # would delete all things if ID doesn't exists (i.e. except).
+                    things = Thing.objects.filter(**request_filters)
+
+                    if self.method == 'DELETE':
+                        api_method = '%s.delete' % resource_type
+                        for thing in things:
+                            thing.delete()
                         things = []
+                        
+                if self.method == 'POST':
+                    api_method = '%s.post' % resource_type
+                    athing = Thing.new(**request_filters)
+                    try:
+                        athing.save()
+                    except ThingParentError, e:
                         self.errors.append({
-                            'code': 404,
-                            'message': 'Resource not found: %s.id = %s' % (module, thingid)
+                            'code': 403,
+                            'message': str(e)
                         })
-                else:
-                    api_method = '%s.get' % resource_type
+                        
+                    if athing.pk:
+                        things = [athing]
+                    else:
+                        things = []
 
-                    if self.method == 'POST':
-                        api_method = '%s.post' % resource_type
+            if 0:
+                module = self.get_singular(resource_type)
+                fields = {'parentid': parentid}
+                if module != 'things':
+                    fields['module'] = module
+                fields.update(request_filters)
+                athing = Thing.new(**fields)
+                
+                if athing:
+                    thingid = parts.pop(0) if parts else None
+                    things = athing.__class__.objects.filter(**request_filters)
+                    if parentid:
+                        things = things.filter(parentid=parentid)
+                        
+                    if thingid:
+                        api_method = '%s.get' % resource_type
                         try:
-                            athing.save()
-                        except ThingParentError, e:
-                            self.errors.append({
-                                'code': 403,
-                                'message': str(e)
-                            })
-                            
-                        if athing.pk:
-                            things = [athing]
-                        else:
+                            things = [things.get(pk=thingid)]
+                        except ObjectDoesNotExist:
+                            # IMPORTANT: without this, /things/ID/?@method=DELETE  
+                            # would delete all things if ID doesn't exists (i.e. except).
                             things = []
-
-                if self.method == 'DELETE':
-                    api_method = '%s.delete' % resource_type
-                    for thing in things:
-                        thing.delete()
-                    things = []
-                    
-                # TODO: if ask for one return Thing in the data, not as a list
+                            self.errors.append({
+                                'code': 404,
+                                'message': 'Resource not found: %s.id = %s' % (module, thingid)
+                            })
+                    else:
+                        api_method = '%s.get' % resource_type
+    
+                        if self.method == 'POST':
+                            api_method = '%s.post' % resource_type
+                            try:
+                                athing.save()
+                            except ThingParentError, e:
+                                self.errors.append({
+                                    'code': 403,
+                                    'message': str(e)
+                                })
+                                
+                            if athing.pk:
+                                things = [athing]
+                            else:
+                                things = []
+    
+                    if self.method == 'DELETE':
+                        api_method = '%s.delete' % resource_type
+                        for thing in things:
+                            thing.delete()
+                        things = []
+                        
+                    # TODO: if ask for one return Thing in the data, not as a list
             
             data_items = [self.get_json_data_from_thing(thing) for thing in things]
                 

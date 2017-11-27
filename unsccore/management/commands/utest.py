@@ -23,22 +23,8 @@ class Command(BaseCommand):
         self.options = options
         
         worldid = options['worldid'][0]
-        if worldid == 'any':
-            world = World.objects.first()
-            if world:
-                worldid = world.pk
-            else:
-                print 'ERROR: no world found'
-                exit()
-        elif worldid in ['new', 'tmp']:
-            world = World()
-            self.repop_well(world)
-            world.save()
-            worldid = world.pk
-        else: 
-            world = Thing.objects.get(pk=worldid)
             
-        print 'World %s' % world.pk
+        print 'World %s' % worldid
         
         case = options['case'][0]
         
@@ -53,58 +39,69 @@ class Command(BaseCommand):
             found = 1
 
         if case == 'pactions':
-            self.pactions(world)
+            self.pactions(worldid)
             found = 1
 
         if case == 'repop_fitness':
-            self.repop(world, [20,1,20])
+            self.repop(worldid, [20,1,20])
             found = 1
 
         if case == 'repop':
-            self.repop(world)
+            self.repop(worldid)
             found = 1
 
         if case == 'repop_well':
-            self.repop_well(world)
+            self.repop_well(worldid)
             found = 1
             
         if case == 'simulate':
-            self.simulate(world)
+            self.simulate(worldid)
             found = 1
 
         if not found:
             print 'ERROR: Test case not found (%s)' % case
             
-        if options['worldid'][0] in ['tmp']:
-            print 'delete world %s' % world.pk
-            world.delete()
-        
         print 'done'
         
-    def repop(self, world, bot_dims=None):
-        world.recreate()
-        female = 1
-        while True:
-            thing = Thing.new(module='bot', parentid=world.pk, female=female)
-            if bot_dims:
-                thing.dims = bot_dims
-            try:
-                thing.save()
-            except ThingParentError:
-                break
+    def repop(self, worldid, bot_dims=None):
+        # delete children
+        print 'Empty the world'
+
+        if worldid == 'any':
+            world = self.api.first(module='world')
+        else:
+            world = self.api.first(id=worldid)
             
+        if world is None:
+            print 'ERROR: world not found'
+            return 
+        
+        worldid = world['id']
+        
+        for thing in self.api.find(rootid=worldid):
+            if thing['id'] != worldid:
+                self.api.delete(id=thing['id'])
+        
+        female = 1
+        #while True:
+        for i in xrange(10):
+            try:
+                self.api.create(module='bot', parentid=worldid, female=female, rootid=worldid)
+            except UnscriptedApiError:
+                break
             female = 1 - female
+        
+        return worldid
     
-    def repop_well(self, world):
-        world.set_dims([10, 10, 10])
-        world.save()
-        self.repop(world)
-        world.save()
+    def repop_well(self, worldid):
+        #world.set_dims([10, 10, 10])
+        #world.save()
+        worldid = self.repop(worldid)
 
         for i in range(0, 2):
-            Thing.new(module='well', parentid=world.pk).save()
+            self.api.create(module='well', parentid=worldid, rootid=worldid)
             
-    def start_new_cycle(self, cycle, world):
+    def start_new_cycle(self, cycle):
         cycle += 1
         cycle_window = 5
         if cycle % cycle_window == 0:
@@ -121,23 +118,25 @@ class Command(BaseCommand):
                 target_speed = (1.0 / walking_step_duration) * target_population * target_speed_ratio
                 print '%.2fs cycles/s (%.2f x slower). %d cycles in %.2f s' % (speed, target_speed / speed, cycle_window, elapsed)
                 
-                world.perf = {
-                    'cycle_per_second': speed,
-                    'speed_ratio': target_speed / speed,
-                }
+#                 world.perf = {
+#                     'cycle_per_second': speed,
+#                     'speed_ratio': target_speed / speed,
+#                 }
                 
             self.t0 = time.time()
             
         return cycle
     
-    def pactions(self, world):
+    def pactions(self, worldid):
+        
         engine = WorldEngine()
+
+        if worldid == 'any':
+            world = Thing.objects.filter(module='world').first()
+        else:
+            world = Thing.objects.get(pk=worldid)
         
         abot = Thing.objects.filter(module='bot', rootid=world.pk).first()
-        
-        if abot is None:
-            print 'ERROR: this world has no bot'
-            return
         
         print abot.pos
         
@@ -149,9 +148,13 @@ class Command(BaseCommand):
                 print i
                 engine.action(targetid=world.pk, action='walk', actorid=abot.pk, angle=random())
     
-    def simulate(self, world):
+    def simulate(self, worldid):
         from unscbot.models import Bot
         
+        if worldid == 'any':
+            worldid = self.api.first(module='world')['id']
+        print 'World %s' % worldid
+
         limit = self.options.get('cycles')
         
         cycle = -1
@@ -159,13 +162,13 @@ class Command(BaseCommand):
         bots = {}
         
         while True:
-            cycle = self.start_new_cycle(cycle, world)
+            cycle = self.start_new_cycle(cycle)
             
             if limit is not None and cycle >= limit:
                 break
             
             print 'Cycle: %s' % cycle
-            botids = sorted([t['id'] for t in self.api.get_things(module='bot', parentid=world.pk)])
+            botids = sorted([t['id'] for t in self.api.find(module='bot', rootid=worldid)])
         
             if not botids:
                 break
@@ -178,10 +181,5 @@ class Command(BaseCommand):
                     bot.initialise()
                 bot.select_and_call_action()
             
-            world.end_cycle()
-            world.save()
+            #world.end_cycle()
             #time.sleep(0.1)
-        
-        world.save()
-                
-        

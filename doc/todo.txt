@@ -1,5 +1,8 @@
 
 Optimisation:
+    Observations:
+        pactions is much slower when look at the iterations on screen, why?
+
     From top (algo/caching/avoidance) / from bottom (alternatives)
     
     django channels?

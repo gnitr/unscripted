@@ -8,7 +8,7 @@ class World(Thing):
     '''
     def __init__(self, **kwargs):
         defaults = {
-            'dims': [100.0] * 3,
+            'dims': [10.0] * 3,
             'capacity': {
                 'bot': 10,
                 'thing': 100,

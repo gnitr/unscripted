@@ -1,6 +1,9 @@
 import requests
 import json
 
+class UnscriptedApiError(Exception):
+    pass 
+
 class API_Client(object):
     
     def __init__(self):
@@ -11,9 +14,24 @@ class API_Client(object):
     def action(self, targetid, action, **kwargs):
         return self.send_request('things/%s/actions/%s' % (targetid, action), **kwargs)
     
-    def get_things(self, **query):
+    def delete(self, **query):
+        query['@method'] = 'DELETE'
+        return self.send_request('things', **query)
+    
+    def create(self, **query):
+        query['@method'] = 'POST'
+        res = self.send_request(query['module'], **query)
+        return res[0]
+    
+    def find(self, **query):
         return self.request_things(**query)
     
+    def first(self, **query):
+        res = self.find(**query)
+        if len(res):
+            return res[0]
+        return None
+
     def request_things(self, **query):
         return self.send_request('things', **query)
     
@@ -33,18 +51,18 @@ class API_Client(object):
             # fails silently
             pass
         
-        if res and res.ok:
+        if res is not None:
             res_content = json.loads(res.content)
+            error = res_content.get('error')
+            if error:
+                raise UnscriptedApiError('WARNING: processing error %s' % res_content['error']['message'])
             
             if res_content['data']:
                 self.items = res_content['data']['items']
             else:
-                print 'WARNING: interaction error %s' % res_content['error']
+                raise UnscriptedApiError('WARNING: unknown processing error')
         else:
-            if res:
-                print 'WARNING: API request error %s' % res.status_code
-            else:
-                print 'WARNING: API connection error'
+            raise UnscriptedApiError('WARNING: API connection error')
         
         return self.items
 
