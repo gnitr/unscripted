@@ -81,7 +81,7 @@ class API_Client(object):
         import urllib
         qs = urllib.urlencode(query)
         url = self.api_root + path + '?' + qs
-        # print url
+        #print url
 
         res = None
         try:
@@ -92,8 +92,10 @@ class API_Client(object):
 
         if res is not None:
             # print res.headers
-            ##res_content = json.loads(res.content)
-            res_content = json.loads(res)
+            if hasattr(res, 'content'):
+                res_content = json.loads(res.content)
+            else:
+                res_content = json.loads(res)
             error = res_content.get('error')
             if error:
                 raise UnscriptedApiError(

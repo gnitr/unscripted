@@ -176,6 +176,8 @@ class Command(BaseCommand):
 
         bots = {}
 
+        t0 = time.time()
+
         while True:
             cycle = self.start_new_cycle(cycle)
 
@@ -199,6 +201,10 @@ class Command(BaseCommand):
 
             # world.end_cycle()
             # time.sleep(0.1)
+        
+        t1 = time.time()
+        
+        print '%s reqs./s.' % int(limit / (t1 - t0) * 11)
 
     def conn(self):
         t0 = time.time()

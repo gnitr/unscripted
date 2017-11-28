@@ -132,7 +132,7 @@ class UnscriptedAPI(object):
                 if parentid:
                     request_filters['parentid'] = parentid
 
-                print request_filters
+                #print request_filters
 
                 if self.method in ['GET', 'DELETE']:
                     
