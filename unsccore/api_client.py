@@ -2,6 +2,7 @@ import requests
 import json
 # http://www.angryobjects.com/2011/10/15/http-with-python-pycurl-by-example/
 import pycurl
+# TODO: Works with PyPy but is it more efficient than StringIO?
 import cStringIO as StringIO
 
 
@@ -14,22 +15,31 @@ class PyCurlSession(object):
         #c.setopt(c.COOKIEFILE, '')
         #c.setopt(c.URL, 'http://myappserver.com/ses1')
         c.setopt(c.FAILONERROR, True)
-        c.setopt(c.HTTPHEADER, ['Accept: text/html', 'Accept-Charset: UTF-8'])
+        c.setopt(c.HTTPHEADER, ['Accept: text/html',
+                                'Accept-Charset: UTF-8',
+                                'Connection: keep-alive'])
         self.res = ''
+
+    def get_headers(self):
+        return self.headers
 
     def get(self, url):
         self.res = None
-        self.buf = StringIO.StringIO()
-        self.c.setopt(self.c.WRITEFUNCTION, self.buf.write)
+        buf = StringIO.StringIO()
+        headers = StringIO.StringIO()
+        self.c.setopt(self.c.WRITEFUNCTION, buf.write)
+        self.c.setopt(self.c.HEADERFUNCTION, headers.write)
         self.c.setopt(self.c.URL, url)
         try:
             self.c.perform()
         except pycurl.error as error:
-            errno, errstr = error
-            raise Exception(errstr)
+            #errno, errstr = error
+            raise error
 
-        self.res = self.buf.getvalue()
-        self.buf.close()
+        self.res = buf.getvalue()
+        buf.close()
+        self.headers = headers.getvalue()
+        headers.close()
 
         return self.res
 
@@ -81,7 +91,7 @@ class API_Client(object):
         import urllib
         qs = urllib.urlencode(query)
         url = self.api_root + path + '?' + qs
-        #print url
+        # print url
 
         res = None
         try:
@@ -92,6 +102,7 @@ class API_Client(object):
 
         if res is not None:
             # print res.headers
+            # print self.session.get_headers()
             if hasattr(res, 'content'):
                 res_content = json.loads(res.content)
             else:

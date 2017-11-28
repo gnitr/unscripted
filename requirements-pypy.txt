@@ -1,0 +1,3 @@
+# To install 'portable pypy': https://devforgalaxy.github.io/en/2016/01/18/install-pypy-on-amazon-linux-en.html
+# sudo apt-get install pypy-libs pypy-dev
+-r requirements.txt
