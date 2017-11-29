@@ -54,7 +54,7 @@ class Collection(object):
         tid = dbutils.get_threadid()
         cid = id(self)
         ptcid = '%s:%s:%s' % (pid, tid, cid)
-        ptcid_last = cache.get(self.key + '.ptid', '123:1:1')
+        ptcid_last = cache.get(self.key + '.ptid', '54321:1:1')
         if ptcid_last != ptcid:
             ret = False
             # last owner different from us, check if process still alive
