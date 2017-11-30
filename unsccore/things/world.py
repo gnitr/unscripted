@@ -59,7 +59,7 @@ class World(Thing):
         
         # TODO: move capacity quota to Thing
         
-        for module_key, quantity in self.capacity.iteritems():
+        for module_key, quantity in self.capacity.items():
             module_class = self.get_class_from_module_key(module_key)
             if isinstance(child, module_class):
                 # TODO: we need to get all subclasses as well!

@@ -3,7 +3,14 @@ import json
 # http://www.angryobjects.com/2011/10/15/http-with-python-pycurl-by-example/
 import pycurl
 # TODO: Works with PyPy but is it more efficient than StringIO?
-import cStringIO as StringIO
+try:
+    from cStringIO import StringIO as StringIO
+except ModuleNotFoundError:
+    from io import BytesIO as StringIO
+try:
+    from urllib import urlencode
+except:
+    from urllib.parse import urlencode
 
 
 class PyCurlSession(object):
@@ -25,8 +32,8 @@ class PyCurlSession(object):
 
     def get(self, url):
         self.res = None
-        buf = StringIO.StringIO()
-        headers = StringIO.StringIO()
+        buf = StringIO()
+        headers = StringIO()
         self.c.setopt(self.c.WRITEFUNCTION, buf.write)
         self.c.setopt(self.c.HEADERFUNCTION, headers.write)
         self.c.setopt(self.c.URL, url)
@@ -83,15 +90,14 @@ class API_Client(object):
 
     def request_things(self, **query):
         return self.send_request('things', **query)
-
+    
     def send_request(self, path, **query):
         self.items = None
 
         # https://stackoverflow.com/questions/17301938/making-a-request-to-a-restful-api-using-python
-        import urllib
-        qs = urllib.urlencode(query)
+        qs = urlencode(query)
         url = self.api_root + path + '?' + qs
-        # print url
+        #print(url)
 
         res = None
         try:

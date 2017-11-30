@@ -24,7 +24,7 @@ class UnscriptedAPI(object):
                     'rel': 'self',
                     'href': self.get_href(item['path'])
                 }]
-        from mogels import get_backend
+        from .mogels import get_backend
         from django.conf import settings
         import sys
         #server = self.request.META.get('wsgi.file_wrapper', None)
@@ -109,14 +109,14 @@ class UnscriptedAPI(object):
         data_items = []
         data = {}
         request_filters = {}
-        for k, v in self.request.GET.iteritems():
+        for k, v in self.request.GET.items():
             if k.startswith('@'):
                 continue
             if k == 'id':
                 k = 'pk'
             request_filters[k] = v
-
-        print len(parts), self.method
+            
+        #print len(parts), self.method
 
         if len(parts) < 1:
             api_method = 'api.get'
@@ -139,7 +139,7 @@ class UnscriptedAPI(object):
                 engine = WorldEngine()
                 api_method = 'thing.action.%s' % action
                 # seems useless, but actually needed b/c GET is a list of lists
-                params = {k: v for k, v in self.request.GET.iteritems()}
+                params = {k: v for k, v in self.request.GET.items()}
                 things = engine.action(
                     targetid=parentid, action=action, **params)
             else:

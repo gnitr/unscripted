@@ -1,5 +1,6 @@
+from future.utils import with_metaclass
 import time
-from dbackends import utils as dbutils
+from .dbackends import utils as dbutils
 from django.conf import settings
 
 QUERYSET = None
@@ -10,7 +11,7 @@ def set_backend(module_name):
     import importlib
     module = importlib.import_module('.' + module_name, 'unsccore.dbackends')
     QUERYSET = module.MongoQuerySet
-    print 'UNSCRIPTED BACKEND = %s' % str(QUERYSET.__module__)
+    print('UNSCRIPTED BACKEND = %s' % str(QUERYSET.__module__))
 
 
 def get_backend():
@@ -61,7 +62,7 @@ class MongoModel(object):
         self.objects._mongo_delete_one(self)
 
     def _set_mongo_dict(self, doc):
-        for k, v in dbutils.get_model_dict_from_mongo_dict(doc).iteritems():
+        for k, v in dbutils.get_model_dict_from_mongo_dict(doc).items():
             setattr(self, k, v)
 
     def _get_mongo_dict(self):
@@ -81,7 +82,7 @@ class MongoDocumentModuleMeta(type):
         cls.module = dbutils.get_key_from_class_name(cls.__name__)
 
 
-class MongoDocumentModule(MongoModel):
+class MongoDocumentModule(with_metaclass(MongoDocumentModuleMeta, MongoModel)):
     '''
     A MongoModel that allow to store variants of the same documents within
     the same collection. Each variant is called a module and has its own set of
@@ -91,7 +92,7 @@ class MongoDocumentModule(MongoModel):
     and class that will be used to instantiate the model object.
     '''
 
-    __metaclass__ = MongoDocumentModuleMeta
+    #__metaclass__ = MongoDocumentModuleMeta
 
     # e.g. {'bot': <Bot>, ...}
     _ccache = {'modules_class': {}}

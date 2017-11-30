@@ -1,3 +1,6 @@
+pm ucore crunch; pm ucore new; pm utest any repop_well
+gunicorn -w 1 unscripted.wsgi:application
+
 Optimisation:
     Observations:
         pactions is much slower when look at the iterations on screen, why?
@@ -38,9 +41,11 @@ Optimisation:
         
         TODO:
         * - replace django with something else: 
-            - bottle
             - nothing!
+            - sanic
             - falcon
+            - bottle
+            - flask: single threaded
         * - websockets
         - cpu affinity
             - improves cpython 'conn': 1686, 1747, 1520 from 1459, 1450
@@ -49,11 +54,10 @@ Optimisation:
             X change uwsgi:listen option won't make a difference b/c client wait for response before sending next request...
             It is like a single thread split between two processes! 
         - replace bjoern/uwsgi/runserver with something fats and pypy compatible:
-            - uwsgi: ~libpypy-c.so mising so can't run server
+            - uwsgi: 
             - gunicorn: ~2800 (pypy) req /s but it requires nginx to deal with http/1.1, keep-alive and buffering requests
             X cherrypy: ~5000 req /s but hangs on simulate
-            X bjoern: not pypy-compatible
-            - flask: single threaded
+            ~ bjoern: not pypy-compatible
             X mainheld (very poor doc; obscure fail on second request when keep-alive = 100)
                 http://nullege.com/codes/show/src%40g%40o%40go-rest-api-server-HEAD%40python%40rest_server.py/47/meinheld.server.set_keepalive/python
         () DEBUG = False (Doesn't seem to make much diff on simulate)

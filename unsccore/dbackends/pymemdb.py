@@ -5,12 +5,12 @@ Single thread, single process.
 
 Author: Geoffroy Noel
 '''
-
+from builtins import object
 from bson.objectid import ObjectId
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 from bson.json_util import dumps, loads
-import utils as dbutils
+from . import utils as dbutils
 import json
 
 class CollectionInsertedResponse(object):
@@ -70,12 +70,12 @@ class Collection(object):
     def save(self):
         content = dumps(self._id_docs)
         cache.set(self.key, content)
-        print 'COLLECTION WRITTEN (%s)' % (get_collection_size_info(self._id_docs, content))
+        print('COLLECTION WRITTEN (%s)' % (get_collection_size_info(self._id_docs, content)))
         
     def load(self):
         content = cache.get(self.key) or '{}'
         self._id_docs = loads(content)
-        print 'COLLECTION READ (%s)' % (get_collection_size_info(self._id_docs, content))
+        print('COLLECTION READ (%s)' % (get_collection_size_info(self._id_docs, content)))
     
     def find(self, query):
         ret = []
@@ -83,7 +83,7 @@ class Collection(object):
         for doc in self._id_docs.values():
             
             match = 1
-            for k, v in query.iteritems():
+            for k, v in query.items():
                 if doc.get(k, None) != v:
                     match = 0
                     break
@@ -121,7 +121,7 @@ class Cursor(object):
             ret = self._limit
         return ret
     
-    def next(self):
+    def __next__(self):
         self.pos += 1
         if self.pos >= self.count():
             raise StopIteration
@@ -214,14 +214,14 @@ class MongoQuerySet(object):
     def __iter__(self):
         return self.clone()
     
-    def next(self):
+    def __next__(self):
         return self._get_next()
     
     def _get_next(self, limit=0):
         cursor = self._get_cursor()
         if limit:
             cursor.limit(limit)
-        doc = cursor.next()
+        doc = cursor.__next__()
         ret = self.doc_class.new(**doc)
         return ret
 

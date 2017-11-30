@@ -10,3 +10,4 @@ names
 # sudo apt-get install pypy-dev (for pypy)
 # sudo apt-get install libcurl4-openssl-dev
 pycurl
+# conda install -c conda-forge uwsgi

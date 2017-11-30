@@ -29,7 +29,7 @@ class WorldEngine(object):
                     if targets:
                         action_method(actor=actor, **kwargs)
                     else:
-                        print 'Not within reach'
+                        print('Not within reach')
                         pass
                 else:
                     raise EngineError('Unknown action "%s"' % action)

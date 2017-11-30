@@ -1,3 +1,7 @@
+try:
+  basestring
+except NameError:
+  basestring = str
 from bson.objectid import ObjectId
 import re
 import os
@@ -52,9 +56,9 @@ def get_mongo_dict_from_model(model):
 
 def _get_mongo_dict_from_model_dict(d):
     ret = {}
-    for k, v in d.iteritems():
+    for k, v in d.items():
         if callable(v):
-            print 'CALLABLE %s %s' % (k, v)
+            print('CALLABLE %s %s' % (k, v))
         if k.startswith('_'):
             continue
         if k == 'pk':
@@ -71,7 +75,7 @@ def _get_mongo_dict_from_model_dict(d):
 
 def get_model_dict_from_mongo_dict(d):
     ret = {}
-    for k, v in d.iteritems():
+    for k, v in d.items():
         if k == 'module':
             # .module is derived from the model class (Bot.module = 'bot')
             continue
@@ -95,7 +99,7 @@ def get_api_dict_from_model(model):
 
 def _get_api_dict_from_model_dict(d):
     ret = {}
-    for k, v in d.iteritems():
+    for k, v in d.items():
         if k == 'pk':
             k = 'id'
         if k.startswith('_'):
@@ -108,7 +112,7 @@ def _get_api_dict_from_model_dict(d):
 
 def get_model_dict_from_api_dict(d):
     ret = {}
-    for k, v in d.iteritems():
+    for k, v in d.items():
         if k == 'id':
             k = 'pk'
         if k.startswith('_'):

@@ -41,30 +41,35 @@ class Command(BaseCommand):
             self.reindex()
             found = 1
 
+        if action == 'uncache':
+            from django.core.cache import cache
+            cache.clear()
+            found = 1
+
         if not found:
-            print 'ERROR: action not found (%s)' % action
+            print('ERROR: action not found (%s)' % action)
         
-        print 'done'
+        print('done')
 
     def info(self):
         worlds = self.api.find(module='world')
         if worlds is None:
-            print 'ERROR: cannot connect to the API'
+            print('ERROR: cannot connect to the API')
         else:
             for world in worlds:
                 things = self.api.find(rootid=world['id'])
-                print world['id'], world['created'], len(things)
+                print('%s, %s, %s'  % (world['id'], world['created'], len(things)))
         
     def crunch(self):
         self.api.delete()
         
     def compile(self):
         ret = Thing.cache_actions()
-        print ret
+        print(ret)
         
         world = Thing.new(module='world')
-        print world._generate_actions()
-        print world.get_actions()
+        print(world._generate_actions())
+        print(world.get_actions())
         
     def reindex(self):
         thing = Thing()

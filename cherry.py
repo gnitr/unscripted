@@ -57,5 +57,5 @@ class DjangoApplication(object):
 
 
 if __name__ == "__main__":
-    print "Your app is running at http://localhost:8001"
+    print("Your app is running at http://localhost:8001")
     DjangoApplication().run()

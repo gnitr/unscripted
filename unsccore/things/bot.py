@@ -58,7 +58,7 @@ class Bot(Thing):
         return ret
 
     def die(self, cause='unknown'):
-        print 'DIE of %s' % cause
+        print('DIE of %s' % cause)
         self.delete()
         return False
         

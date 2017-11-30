@@ -22,7 +22,7 @@ class Bot(object):
         ret = self.initialise()
         
         if not ret:
-            print 'ERROR: could not connect to the API'
+            print('ERROR: could not connect to the API')
         else:
             import time
             while True:

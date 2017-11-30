@@ -1,9 +1,10 @@
+from builtins import range
 from django.core.management.base import BaseCommand, CommandError
 #from unsccore.models import World, Box
 from unsccore.things.thing import Thing, ThingParentError
 from unsccore.things.world import World
 from unsccore import mogels
-from unsccore.api_client import API_Client
+from unsccore.api_client import API_Client, UnscriptedApiError
 import time
 from unsccore.engine import WorldEngine
 from random import random
@@ -26,7 +27,7 @@ class Command(BaseCommand):
 
         worldid = options['worldid'][0]
 
-        print 'World %s' % worldid
+        print('World %s' % worldid)
 
         case = options['case'][0]
 
@@ -40,7 +41,7 @@ class Command(BaseCommand):
             api = API_Client()
             res = api.get_things()
 
-            print res
+            print(res)
 
             found = 1
 
@@ -65,13 +66,13 @@ class Command(BaseCommand):
             found = 1
 
         if not found:
-            print 'ERROR: Test case not found (%s)' % case
+            print('ERROR: Test case not found (%s)' % case)
 
-        print 'done'
+        print('done')
 
     def repop(self, worldid, bot_dims=None):
         # delete children
-        print 'Empty the world'
+        print('Empty the world')
 
         if worldid == 'any':
             world = self.api.first(module='world')
@@ -79,7 +80,7 @@ class Command(BaseCommand):
             world = self.api.first(id=worldid)
 
         if world is None:
-            print 'ERROR: world not found'
+            print('ERROR: world not found')
             return
 
         worldid = world['id']
@@ -90,7 +91,7 @@ class Command(BaseCommand):
 
         female = 1
         # while True:
-        for i in xrange(10):
+        for i in range(10):
             try:
                 self.api.create(
                     module='bot',
@@ -127,7 +128,7 @@ class Command(BaseCommand):
                 target_speed_ratio = 100
                 target_speed = (1.0 / walking_step_duration) * \
                     target_population * target_speed_ratio
-                print '%.2fs cycles/s (%.2f x slower). %d cycles in %.2f s' % (speed, target_speed / speed, cycle_window, elapsed)
+                print('%.2fs cycles/s (%.2f x slower). %d cycles in %.2f s' % (speed, target_speed / speed, cycle_window, elapsed))
 
 #                 world.perf = {
 #                     'cycle_per_second': speed,
@@ -149,14 +150,14 @@ class Command(BaseCommand):
 
         abot = Thing.objects.filter(module='bot', rootid=world.pk).first()
 
-        print abot.pos
+        print(abot.pos)
 
         limit = self.options.get('cycles') or 10
 
         if abot:
-            print 'bot %s %s' % (abot.pk, abot.name)
-            for i in xrange(limit):
-                print i
+            print('bot %s %s' % (abot.pk, abot.name))
+            for i in range(limit):
+                print(i)
                 engine.action(
                     targetid=world.pk,
                     action='walk',
@@ -168,7 +169,7 @@ class Command(BaseCommand):
 
         if worldid == 'any':
             worldid = self.api.first(module='world')['id']
-        print 'World %s' % worldid
+        print('World %s' % worldid)
 
         limit = self.options.get('cycles')
 
@@ -184,7 +185,7 @@ class Command(BaseCommand):
             if limit is not None and cycle >= limit:
                 break
 
-            print 'Cycle: %s' % cycle
+            print('Cycle: %s' % cycle)
             botids = sorted(
                 [t['id'] for t in self.api.find(module='bot', rootid=worldid)])
 
@@ -204,7 +205,7 @@ class Command(BaseCommand):
 
         t1 = time.time()
 
-        print '%s reqs./s.' % int(limit / (t1 - t0) * 11)
+        print('%s reqs./s.' % int(limit / (t1 - t0) * 11))
 
     def conn(self):
         t0 = time.time()
@@ -212,11 +213,11 @@ class Command(BaseCommand):
         cycles = self.options.get('cycles')
 
         o = 0
-        for i in xrange(cycles):
+        for i in range(cycles):
             # print i
             r = self.api.send_request('', i=i)
             # sleep(0.00001)
 
         t1 = time.time()
 
-        print '%s reqs./s.' % int(cycles / (t1 - t0))
+        print('%s reqs./s.' % int(cycles / (t1 - t0)))
