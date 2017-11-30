@@ -20,6 +20,8 @@ class CollectionInsertedResponse(object):
 
 import atexit
 
+atexit.register(lambda: [c.save() for c in Collection._collections.values()])
+
 def get_collection_size_info(docs, serialised):
     return '%s things, %.4f MB' % (len(docs), len(serialised) / 1024.0 / 1024)
 
@@ -41,7 +43,8 @@ class Collection(object):
             raise Exception(self.lock_error)
         self.load()
         
-        atexit.register(lambda: self.save())
+    def __del__(self):
+        print('DELETED')
     
     def lock(self):
         '''Returns False if another running thread is using this collection.
@@ -68,45 +71,53 @@ class Collection(object):
         return ret 
 
     def save(self):
-        content = dumps(self._id_docs)
+        print('SAVE')
+        content = dumps({str(k): dbutils.get_mongo_dict_from_model(model) for k, model in self._id_docs.items()})
+        print(content)
         cache.set(self.key, content)
         print('COLLECTION WRITTEN (%s)' % (get_collection_size_info(self._id_docs, content)))
         
     def load(self):
+        from unsccore.mogels import MongoDocumentModule
         content = cache.get(self.key) or '{}'
-        self._id_docs = loads(content)
+        self._id_docs = {}
+        for doc in loads(content).values():
+            model = MongoDocumentModule.new(**doc)
+            self._id_docs[model.pk] = model
+            
+        print(self._id_docs)
+        
         print('COLLECTION READ (%s)' % (get_collection_size_info(self._id_docs, content)))
     
     def find(self, query):
         ret = []
         
-        for doc in self._id_docs.values():
+        for model in self._id_docs.values():
             
             match = 1
             for k, v in query.items():
-                if doc.get(k, None) != v:
+                if getattr(model, k, None) != v:
                     match = 0
                     break
             
             if match:
-                ret.append(doc)
+                ret.append(model)
         
         return Cursor(ret)
     
-    def insert_one(self, doc):
+    def insert_one(self, model):
         # TODO: check for duplicates
-        doc['_id'] = doc.get('_id', None) or ObjectId()
-        self._id_docs[str(doc['_id'])] = doc
-        ret = CollectionInsertedResponse(doc['_id'])
-        return ret
+        model.pk = getattr(model, 'pk', None) or str(ObjectId())
+        self._id_docs[str(model.pk)] = model
 
-    def replace_one(self, query, doc):
-        for adoc in self.find(query):
-            adoc.update(doc)
+    def replace_one(self, model):
+        # TODO: assume here we replace with full object
+        self._id_docs[str(model.pk)] = model
+#         for adoc in self.find(query):
+#             adoc.update(model)
 
-    def delete_one(self, query):
-        for adoc in self.find(query):
-            del self._id_docs[str(adoc.get('_id'))]
+    def delete_one(self, model):
+        del self._id_docs[str(model.pk)]
 
 class Cursor(object):
     
@@ -175,6 +186,7 @@ class MongoQuerySet(object):
         pass
     
     def create(self, **kwargs):
+        # TODO: unused?
         obj = self.doc_class.new(**kwargs)
         obj.save()
         return obj
@@ -221,14 +233,14 @@ class MongoQuerySet(object):
         cursor = self._get_cursor()
         if limit:
             cursor.limit(limit)
-        doc = cursor.__next__()
-        ret = self.doc_class.new(**doc)
+        ret = cursor.__next__()
+        #ret = self.doc_class.new(**doc)
         return ret
 
-    def __getitem__(self, key):
+    def __getitem__(self, idx):
         # can raise IndexError
         cursor = self._get_cursor()
-        return self.doc_class.new(**cursor[key])
+        return cursor[idx]
      
     def _get_collection(self):
         # TODO: cache?
@@ -240,15 +252,16 @@ class MongoQuerySet(object):
             collection = self._get_collection()
             # TODO: query
             
-            filters = dbutils._get_mongo_dict_from_model_dict(self.query['filters'])
+            #filters = dbutils._get_mongo_dict_from_model_dict(self.query['filters'])
             # TODO: works for simple care field=value
             # but need to convert django operators to mongo
 
             ## print 'MONGO FIND (%s)' % repr(filters)
-            self.cursor = collection.find(filters)
+            self.cursor = collection.find(self.query['filters'])
             #self.cursor.batch_size(100)
                 
             if self.query['order']:
+                # TODO
                 orders = []
                 for field in [self.query['order']]:
                     if field == 'pk': field = '_id'
@@ -264,12 +277,11 @@ class MongoQuerySet(object):
 
     def _mongo_replace_one(self, model):
         collection = self._get_collection()
-        doc = model._get_mongo_dict()
-        if doc.get('_id'):
-            collection.replace_one({'_id': doc['_id']}, doc)
+        #doc = model._get_mongo_dict()
+        if getattr(model, 'pk'):
+            collection.replace_one(model)
         else:
-            model.pk = str(collection.insert_one(doc).inserted_id)
+            collection.insert_one(model)
 
     def _mongo_delete_one(self, model):
-        doc = model._get_mongo_dict()
-        self._get_collection().delete_one({'_id': doc['_id']})
+        self._get_collection().delete_one(model)

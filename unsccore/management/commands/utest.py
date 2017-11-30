@@ -141,10 +141,16 @@ class Command(BaseCommand):
 
     def pactions(self, worldid):
 
+#         for t in Thing.objects.all():
+#             t.delete()
+
         engine = WorldEngine()
 
         if worldid == 'any':
             world = Thing.objects.filter(module='world').first()
+        elif worldid == 'new':
+            world = World()
+            world.save()
         else:
             world = Thing.objects.get(pk=worldid)
 

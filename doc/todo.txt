@@ -41,21 +41,21 @@ Optimisation:
         
         TODO:
         * - replace django with something else: 
-            - nothing!
+            * nothing!
             - sanic
             - falcon
             - bottle
             - flask: single threaded
         * - websockets
         - cpu affinity
-            - improves cpython 'conn': 1686, 1747, 1520 from 1459, 1450
+            * improves cpython 'conn': 1686, 1747, 1520 from 1459, 1450
         - uwsgi queue
             - https://stackoverflow.com/a/36452474/3748764
             X change uwsgi:listen option won't make a difference b/c client wait for response before sending next request...
             It is like a single thread split between two processes! 
         - replace bjoern/uwsgi/runserver with something fats and pypy compatible:
             - uwsgi: 
-            - gunicorn: ~2800 (pypy) req /s but it requires nginx to deal with http/1.1, keep-alive and buffering requests
+            * gunicorn: ~2800 (pypy) req /s but it requires nginx to deal with http/1.1, keep-alive and buffering requests
             X cherrypy: ~5000 req /s but hangs on simulate
             ~ bjoern: not pypy-compatible
             X mainheld (very poor doc; obscure fail on second request when keep-alive = 100)
@@ -109,7 +109,7 @@ Optimisation:
         
     
 
-python -m cProfile -o s2.cperf manage.py utest any pactions
+python -m cProfile -o s2.cperf manage.py utest any pactions --cycles 10000
 pyprof2calltree -k -i s2.cperf
 
 mind:
