@@ -1,4 +1,4 @@
-pm ucore crunch; pm ucore new; pm utest any repop_well
+pm ucore uncache && pm ucore crunch && pm ucore new && pm utest any repop_well
 gunicorn -w 1 unscripted.wsgi:application
 
 Optimisation:

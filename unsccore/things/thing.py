@@ -2,7 +2,7 @@ from unsccore import mogels
 from bson.objectid import ObjectId
 from django.core.cache import cache
 from unsccore.dbackends.utils import ClassProperty
-import json
+from unsccore.dbackends.utils import json
 
 class ThingParentError(Exception):
     pass
@@ -42,15 +42,6 @@ class Thing(mogels.MongoDocumentModule):
             self.__class__.__name__, self.module,
             self.pos[0], self.pos[1], self.pos[2],
         )
-        return ret
-    
-    def _set_doc(self, doc):
-        super(Thing, self)._set_doc(doc)
-        self.parentid = str(doc['parentid']) if doc['parentid'] else None
-
-    def _get_doc(self):
-        ret = super(Thing, self)._get_doc()
-        ret['parentid'] = ObjectId(self.parentid) if self.parentid else None
         return ret
     
     @classmethod
@@ -218,7 +209,7 @@ class Thing(mogels.MongoDocumentModule):
         
         for method_name in dir(cls):
             method = getattr(cls, method_name)
-            if inspect.ismethod(method):
+            if inspect.isfunction(method):
                 margs = inspect.getargspec(method)
                 if len(margs) > 1 and margs.args[0:2] == ['self', 'actor']:
                     action = {k: 0.0 for k in margs.args[2:]}

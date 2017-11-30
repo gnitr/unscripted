@@ -163,6 +163,9 @@ class UnscriptedAPI(object):
                     if self.method == 'DELETE':
                         api_method = '%s.delete' % resource_type
                         for thing in things:
+                            print(thing.pk)
+                        for thing in things:
+                            print(thing.pk)
                             thing.delete()
                         things = []
 

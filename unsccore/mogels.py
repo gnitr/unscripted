@@ -30,7 +30,6 @@ class MongoModel(object):
     are used both like django model attributes and
     mongodb field.
 
-    _get_doc and _set_doc do the conversion
     between the dajngo model and mongo document.
 
     The primary key field is called 'pk', NOT 'id'.

@@ -9,9 +9,8 @@ from builtins import object
 from bson.objectid import ObjectId
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
-from bson.json_util import dumps, loads
 from . import utils as dbutils
-import json
+from unsccore.dbackends.utils import json
 
 class CollectionInsertedResponse(object):
     
@@ -44,7 +43,8 @@ class Collection(object):
         self.load()
         
     def __del__(self):
-        print('DELETED')
+        #print('DELETED')
+        pass
     
     def lock(self):
         '''Returns False if another running thread is using this collection.
@@ -71,9 +71,7 @@ class Collection(object):
         return ret 
 
     def save(self):
-        print('SAVE')
-        content = dumps({str(k): dbutils.get_mongo_dict_from_model(model) for k, model in self._id_docs.items()})
-        print(content)
+        content = json.dumps({str(k): dbutils.get_mongo_dict_from_model(model, plain_id=True) for k, model in self._id_docs.items()})
         cache.set(self.key, content)
         print('COLLECTION WRITTEN (%s)' % (get_collection_size_info(self._id_docs, content)))
         
@@ -81,17 +79,21 @@ class Collection(object):
         from unsccore.mogels import MongoDocumentModule
         content = cache.get(self.key) or '{}'
         self._id_docs = {}
-        for doc in loads(content).values():
+        for doc in json.loads(content).values():
             model = MongoDocumentModule.new(**doc)
             self._id_docs[model.pk] = model
             
-        print(self._id_docs)
-        
         print('COLLECTION READ (%s)' % (get_collection_size_info(self._id_docs, content)))
     
     def find(self, query):
         ret = []
         
+        if len(query) == 1:
+            m = self._id_docs.get(query.get('pk'))
+            if m:
+                return Cursor([m])
+        
+        # TODO: use views!
         for model in self._id_docs.values():
             
             match = 1
@@ -117,7 +119,8 @@ class Collection(object):
 #             adoc.update(model)
 
     def delete_one(self, model):
-        del self._id_docs[str(model.pk)]
+        if str(model.pk) in self._id_docs:
+            del self._id_docs[str(model.pk)]
 
 class Cursor(object):
     
@@ -204,6 +207,7 @@ class MongoQuerySet(object):
     
     def first(self):
         try:
+            self._get_cursor()
             return self._get_next(1)
         except StopIteration:
             return None
@@ -224,13 +228,15 @@ class MongoQuerySet(object):
         return self
     
     def __iter__(self):
-        return self.clone()
+        ret = self.clone()
+        ret._get_cursor()
+        return ret
     
     def __next__(self):
         return self._get_next()
     
     def _get_next(self, limit=0):
-        cursor = self._get_cursor()
+        cursor = self.cursor
         if limit:
             cursor.limit(limit)
         ret = cursor.__next__()

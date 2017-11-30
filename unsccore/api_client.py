@@ -1,5 +1,5 @@
 import requests
-import json
+from unsccore.dbackends.utils import json
 # http://www.angryobjects.com/2011/10/15/http-with-python-pycurl-by-example/
 import pycurl
 # TODO: Works with PyPy but is it more efficient than StringIO?

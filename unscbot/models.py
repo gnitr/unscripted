@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
-from django.db import models
 from random import random, randint
-import requests
-import json
 from unsccore.api_client import API_Client
 
 # Create your models here.
