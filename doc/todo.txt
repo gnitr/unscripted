@@ -66,7 +66,7 @@ Optimisation:
             - curl -Iv http://127.0.0.1:8000/api/1/ --next http://127.0.0.1:8000/api/1/ 2>&1
             => NOT with runserver; OK with uwsgi; OK with bjoern
         - use pypy
-            DONE try json alternatives:
+         DONE try json alternatives:
             - ujson (CPython only): OK, but for simple message, not a big difference (<10%) 
             - msgpack
             - pypy
