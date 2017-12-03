@@ -1,3 +1,8 @@
+1. python 3 runserver doesn't save pymemdb collection when ctrl-c is pressed
+    pm runserver 0:8000 --nothreading --noreload
+2. seg fault with pypy server when running a simulation
+3. pi3 64 bits is much slower than 32bits, why?
+
 pm ucore uncache && pm ucore crunch && pm ucore new && pm utest any repop_well
 gunicorn -w 1 unscripted.wsgi:application
 

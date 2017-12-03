@@ -18,11 +18,15 @@ class CollectionInsertedResponse(object):
     def __init__(self, inserted_id):
         self.inserted_id = inserted_id
 
-
+# NOT WORKING with runserver for python 3
+print('HERE')
 import atexit
 
-atexit.register(lambda: [c.save() for c in Collection._collections.values()])
+atexit.register(lambda: Collection.save_collections())
 
+# import signal
+# #thread.enable_signals()
+# signal.signal(signal.SIGINT, lambda: print('test'))
 
 def get_collection_size_info(docs, serialised):
     return '%s things, %.4f MB' % (len(docs), len(serialised) / 1024.0 / 1024)
@@ -32,6 +36,11 @@ class Collection(object):
 
     _collections = {}
 
+    @classmethod
+    def save_collections(cls):
+        print('SAVE COLLECTIONS'); 
+        [c.save() for c in Collection._collections.values()]
+         
     @classmethod
     def get_collection(cls, key):
         ret = cls._collections.get(key)
@@ -45,9 +54,9 @@ class Collection(object):
         if not self.lock():
             raise Exception(self.lock_error)
         self.load()
-
+        
     def __del__(self):
-        pass
+        print('DEL')
 
     def lock(self):
         '''Returns False if another running thread is using this collection.

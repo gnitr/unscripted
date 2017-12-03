@@ -1,14 +1,15 @@
 try:
-  basestring
+    basestring
 except NameError:
-  basestring = str
+    # python 3
+    basestring = str
 from bson.objectid import ObjectId
 import re
 import os
 try:
     import ujson as json
-    print('UJSON')
 except ImportError:
+    print('WARNING: using json (not ujson)')
     import json
 
 

@@ -11,3 +11,5 @@ names
 # sudo apt-get install libcurl4-openssl-dev
 pycurl
 # conda install -c conda-forge uwsgi
+future
+ujson

@@ -5,11 +5,13 @@ import pycurl
 # TODO: Works with PyPy but is it more efficient than StringIO?
 try:
     from cStringIO import StringIO as StringIO
-except ModuleNotFoundError:
+except ImportError:
+    # pypy
     from io import BytesIO as StringIO
 try:
     from urllib import urlencode
 except:
+    # python 3
     from urllib.parse import urlencode
 
 
@@ -47,7 +49,7 @@ class PyCurlSession(object):
         buf.close()
         self.headers = headers.getvalue()
         headers.close()
-
+        
         return self.res
 
 
@@ -110,8 +112,10 @@ class API_Client(object):
             # print res.headers
             # print self.session.get_headers()
             if hasattr(res, 'content'):
+                # for requests
                 res_content = json.loads(res.content)
             else:
+                # for pycurl
                 res_content = json.loads(res)
             error = res_content.get('error')
             if error:

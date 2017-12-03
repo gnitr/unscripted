@@ -135,7 +135,10 @@ class Command(BaseCommand):
 #                     'speed_ratio': target_speed / speed,
 #                 }
 
+                self.bins[int(speed)] = self.bins.get(int(speed), 0) + 1
+
             self.t0 = time.time()
+            
 
         return cycle
 
@@ -172,6 +175,8 @@ class Command(BaseCommand):
 
     def simulate(self, worldid):
         from unscbot.models import Bot
+        
+        self.bins = {}
 
         if worldid == 'any':
             worldid = self.api.first(module='world')['id']
@@ -210,6 +215,9 @@ class Command(BaseCommand):
             # time.sleep(0.1)
 
         t1 = time.time()
+        
+        for speed in sorted(self.bins.keys()):
+            print('%s, %s' % (speed, self.bins[speed]))
 
         print('%s reqs./s.' % int(limit / (t1 - t0) * 11))
 
