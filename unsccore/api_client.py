@@ -14,6 +14,37 @@ except:
     # python 3
     from urllib.parse import urlencode
 
+class WSSession(object):
+    
+    def __init__(self, api_root):
+        self.socket = None
+        self.api_root = api_root
+        self._response = None
+        
+    def get_headers(self):
+        return 'NOHEADERS'
+    
+    def get(self, url):
+        #print(url)
+        import asyncio
+        import websockets
+        
+        @asyncio.coroutine
+        def _connect():
+            self.socket = yield from websockets.connect(self.api_root.rstrip('/'))
+        
+        if self.socket is None:
+            asyncio.get_event_loop().run_until_complete(_connect())
+            
+        api_path = url[len(self.api_root):]
+        
+        def _send_and_receive(path):
+            yield from self.socket.send(api_path)
+            self._response = yield from self.socket.recv()
+            
+        asyncio.get_event_loop().run_until_complete(_send_and_receive(api_path))
+            
+        return self._response
 
 class PyCurlSession(object):
 
@@ -62,12 +93,15 @@ class API_Client(object):
     def __init__(self):
         # TODO: set dynamically
         # very minor improvement... (<10%, 17% for pure connection time)
-        self.session = PyCurlSession()
+        #self.session = PyCurlSession()
         #self.session = requests.Session()
         #self.session = requests
-        self.api_root = 'http://localhost:8000/api/1/'
+        #self.api_root = 'http://localhost:8000/api/1/'
+        self.api_root = 'ws://localhost:8765/'
+        self.session = WSSession(self.api_root)
+        
         self.items = None
-
+        
     def action(self, targetid, action, **kwargs):
         return self.send_request('things/%s/actions/%s' %
                                  (targetid, action), **kwargs)

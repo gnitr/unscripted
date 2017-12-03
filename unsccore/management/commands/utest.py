@@ -207,7 +207,7 @@ class Command(BaseCommand):
             for botid in botids:
                 bot = bots.get(botid, None)
                 if bot is None:
-                    bots[botid] = bot = Bot(botid)
+                    bots[botid] = bot = Bot(botid, self.api)
                     bot.initialise()
                 bot.select_and_call_action()
 

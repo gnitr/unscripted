@@ -6,8 +6,8 @@ from unsccore.api_client import API_Client
 # Create your models here.
 class Bot(object):
     
-    def __init__(self, botid):
-        self.api = API_Client()
+    def __init__(self, botid, api):
+        self.api = api or API_Client()
         self.botid = botid
         self.items = []
         

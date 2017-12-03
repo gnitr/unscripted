@@ -7,7 +7,8 @@ from bson.objectid import ObjectId
 import re
 import os
 try:
-    import ujson as json
+    #import ujson as json
+    import json
 except ImportError:
     print('WARNING: using json (not ujson)')
     import json

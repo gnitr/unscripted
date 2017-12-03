@@ -5,6 +5,7 @@ from unsccore.things.world import World
 from unsccore import mogels
 from unsccore.api_client import API_Client
 import time
+from unsccore.api import UnscriptedAPI
 
 class Command(BaseCommand):
     help = 'Unscripted core management commands'
@@ -21,6 +22,10 @@ class Command(BaseCommand):
         
         found = 0
         
+        if action == 'runserver':
+            self.runserver()
+            found = 1
+
         if action == 'compile':
             self.compile()
             found = 1
@@ -77,5 +82,9 @@ class Command(BaseCommand):
         q.create_index('parentid', unique=False)
         q.create_index('rootid', unique=False)
         q.create_index('module', unique=False)
+        
+    def runserver(self):
+        server = UnscriptedAPI()
+        server.listen_to_websocket()
         
     

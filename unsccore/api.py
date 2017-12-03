@@ -2,9 +2,31 @@ from django.views.decorators.csrf import csrf_exempt
 from collections import OrderedDict
 from .things.thing import Thing, ThingParentError
 from django.core.exceptions import ObjectDoesNotExist
+from websockets.exceptions import ConnectionClosed
+from django.http.request import HttpRequest, QueryDict
+from unsccore.dbackends.utils import json
 
 API_VERSION = '1.0.0'
 
+class WSRequest(HttpRequest):
+    
+    def __init__(self, message, api_root=''):
+        super(WSRequest, self).__init__()
+        parts = message.split('?')
+        self.api_path = parts.pop(0)
+        self.path = self.api_path
+        self.qs = parts.pop(0) if parts else ''
+        self.GET = QueryDict(self.qs)
+        self.method = 'GET'
+        # TODO: dynamic
+        self.META = {'HTTP_HOST': '127.0.0.1'}
+        
+    def get_api_path(self):
+        return self.api_path
+
+    def _get_scheme(self):
+        return 'ws'
+        
 
 class UnscriptedAPI(object):
 
@@ -37,11 +59,37 @@ class UnscriptedAPI(object):
             'debug': settings.DEBUG
         }
 
+    def listen_to_websocket(self):
+        import asyncio
+        import websockets
+        
+        # TODO: check path = api/1
+        async def hello(socket, path):
+            try: 
+                while True:
+                    message = await socket.recv()
+                    #print(message)
+                    res = self.process_socket_message(message)
+                    #print(res)
+                    await socket.send(json.dumps(res))
+            except ConnectionClosed:
+                print('Connection closed')
+        
+        start_server = websockets.serve(hello, 'localhost', 8765)
+        
+        asyncio.get_event_loop().run_until_complete(start_server)
+        asyncio.get_event_loop().run_forever()
+
     def get_status(self):
         ret = 200
         if 'error' in self.response:
             ret = self.response['error']['code']
         return ret
+
+    def process_socket_message(self, message):
+        # e.g. message = 'worlds/X/things?module=bot&@method=GET'
+        request = WSRequest(message)
+        return self.process(request, request.get_api_path())
 
     def process(self, request, path):
         import uuid
