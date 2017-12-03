@@ -20,7 +20,6 @@ class Command(BaseCommand):
         parser.add_argument('--cycles', nargs='?', type=int)
 
     def handle(self, *args, **options):
-        # mogels.set_backend('mongodb')
         self.api = API_Client()
 
         self.options = options

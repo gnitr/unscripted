@@ -59,9 +59,12 @@ class UnscriptedAPI(object):
             'debug': settings.DEBUG
         }
 
-    def listen_to_websocket(self):
+    def listen_to_websocket(self, hostname='127.0.0.1', port=8000):
         import asyncio
         import websockets
+        
+        if hostname == '0':
+            hostname = '0.0.0.0'
         
         # TODO: check path = api/1
         async def hello(socket, path):
@@ -75,7 +78,7 @@ class UnscriptedAPI(object):
             except ConnectionClosed:
                 print('Connection closed')
         
-        start_server = websockets.serve(hello, 'localhost', 8765)
+        start_server = websockets.serve(hello, hostname, port)
         
         asyncio.get_event_loop().run_until_complete(start_server)
         asyncio.get_event_loop().run_forever()

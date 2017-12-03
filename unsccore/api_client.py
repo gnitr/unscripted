@@ -90,15 +90,21 @@ class UnscriptedApiError(Exception):
 
 class API_Client(object):
 
-    def __init__(self):
-        # TODO: set dynamically
-        # very minor improvement... (<10%, 17% for pure connection time)
-        #self.session = PyCurlSession()
-        #self.session = requests.Session()
-        #self.session = requests
-        #self.api_root = 'http://localhost:8000/api/1/'
-        self.api_root = 'ws://localhost:8765/'
-        self.session = WSSession(self.api_root)
+    def __init__(self, api_root=None):
+        '''api_root: e.g. http://localhost:8000/api/1/'''
+        
+        if api_root is None:
+            from django.conf import settings
+            api_root = settings.UNSCRIPTED_REMOTE_API
+    
+        self.api_root = api_root
+        
+        if self.api_root.startswith('ws'): 
+            self.session = WSSession(self.api_root)
+        else:
+            # PyCurl is faster than requests
+            self.session = PyCurlSession()
+            #self.session = requests.Session()
         
         self.items = None
         

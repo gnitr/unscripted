@@ -19,7 +19,6 @@ class CollectionInsertedResponse(object):
         self.inserted_id = inserted_id
 
 # NOT WORKING with runserver for python 3
-print('HERE')
 import atexit
 
 atexit.register(lambda: Collection.save_collections())
