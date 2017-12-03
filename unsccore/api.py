@@ -173,6 +173,9 @@ class UnscriptedAPI(object):
             api_method = 'api.get'
             self.response['env'] = self.res_env
         else:
+            if parts[0] == 'stop':
+                exit()
+            
             parentid = None
             if len(parts) > 2:
                 parts.pop(0)

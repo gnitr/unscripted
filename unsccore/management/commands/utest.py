@@ -220,6 +220,8 @@ class Command(BaseCommand):
 
         print('%s reqs./s.' % int(limit / (t1 - t0) * 11))
 
+        self.api.stop()
+        
     def conn(self):
         t0 = time.time()
 

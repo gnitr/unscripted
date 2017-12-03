@@ -43,7 +43,21 @@ Optimisation:
         # = 10 cycles / s   => 7 years, 2.5 hours  (100 rq/s)
         #   100             => 9 months, 15 mins   (1000 rq/s)
         # + 1000            => 1 months, 1.5 mins
-        #   10000           => 8 hours 
+        #   10000           => 8 hours
+        
+        # 650 rps asus c36 websockets (local simulation)
+        # 514 c36<-pypy3
+        # 258 rps pypy3
+        # 281 pypy3<-c36
+        => pypy on server side is much slower
+        Ceilings:
+        pactions 2631 rps (c36)
+        conn 2450 rps (c36)
+        What's missing is the encode/decode + list of bots
+        if we assume conn & pactions are cumulative => 1/(1/2631 + 1/2450) = 1268 rps
+        => around half the time is unaccounted for in simulate, what is it?
+        => then we can increase it by using green threads
+        
         
         TODO:
         * - replace django with something else: 

@@ -121,6 +121,9 @@ class API_Client(object):
         res = self.send_request(query['module'], **query)
         return res[0]
 
+    def stop(self):
+        return self.send_request('stop')
+    
     def find(self, **query):
         return self.request_things(**query)
 
