@@ -5,14 +5,16 @@ except NameError:
     basestring = str
 from bson.objectid import ObjectId
 import re
+import platform
 import os
 try:
-    #import ujson as json
-    import json
+    import ujson as json
+    if 'pypy' in platform.python_implementation().lower():
+        print('INFO: ujson cause seg fault on pypy')
+        raise ImportError
 except ImportError:
     print('WARNING: using json (not ujson)')
     import json
-
 
 def get_pid():
     return os.getpid()

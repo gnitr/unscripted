@@ -37,7 +37,7 @@ class Collection(object):
 
     @classmethod
     def save_collections(cls):
-        print('SAVE COLLECTIONS'); 
+        #print('SAVE COLLECTIONS'); 
         [c.save() for c in Collection._collections.values()]
          
     @classmethod
