@@ -210,6 +210,8 @@ class Command(BaseCommand):
                     bot.initialise()
                 bot.select_and_call_action()
 
+            
+
             # world.end_cycle()
             # time.sleep(0.1)
 

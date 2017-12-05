@@ -29,17 +29,18 @@ class WSSession(object):
         import asyncio
         import websockets
         
-        @asyncio.coroutine
-        def _connect():
-            self.socket = yield from websockets.connect(self.api_root.rstrip('/'))
-        
         if self.socket is None:
+            @asyncio.coroutine
+            def _connect():
+                self.socket = yield from websockets.connect(self.api_root.rstrip('/'))
+
             asyncio.get_event_loop().run_until_complete(_connect())
             
         api_path = url[len(self.api_root):]
         
+        @asyncio.coroutine
         def _send_and_receive(path):
-            yield from self.socket.send(api_path)
+            yield from self.socket.send(path)
             self._response = yield from self.socket.recv()
             
         asyncio.get_event_loop().run_until_complete(_send_and_receive(api_path))

@@ -1,3 +1,5 @@
+python -m cProfile -o s.cperf manage.py ucore runserver 0:8000 & python -m cProfile -o c.cperf manage.py utest any simulate --cycles 2000
+
 1. python 3 runserver doesn't save pymemdb collection when ctrl-c is pressed
     pm runserver 0:8000 --nothreading --noreload
 2. seg fault with pypy server when running a simulation
@@ -57,7 +59,11 @@ Optimisation:
         if we assume conn & pactions are cumulative => 1/(1/2631 + 1/2450) = 1268 rps
         => around half the time is unaccounted for in simulate, what is it?
         => then we can increase it by using green threads
-        
+        # sim c35 from pi3 to asus: 53rps
+        # sim c35 pi3 internally: 83 rps
+        # conn c35 pi3 210 rps
+        => optimise pi3
+        => asyncio
         
         TODO:
         * - replace django with something else: 

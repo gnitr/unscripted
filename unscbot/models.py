@@ -34,13 +34,14 @@ class Bot(object):
     
     def select_action(self):
         actions = [{'action': 'pass'}]
+        # gather all actions into an array
         for item in self.items:
             for action in item.get('actions', []):
                 action['targetid'] = item['id']
                 actions.append(action)
-        # select random action
+        # select a random action from the array
         self.action = actions[randint(0, len(actions) - 1)]
-        # select arguments
+        # select random values to the action arguments
         for k in self.action.keys():
             if k not in ['action', 'targetid']:
                 self.action[k] = random()
