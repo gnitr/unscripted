@@ -1,13 +1,18 @@
 
-Test 7 dec 2017, asus, cp36, simulate 100, rps:
-460: websockets, synced
+Test 9 dec 2017, asus, cp36, simulate 100, rps:
+
+470: Pycurl, synced
+490: Pycurl, async
+
+607: websockets, synced
+769: websockets, async, 1 session per bot
 170: websockets, async
-240: aiohttp, synced
-X: aiohttp, asynced
-322: Pycurl, synced
-322: Pycurl, async
-266: urllib3, async
-260: urllib3, sync
+
+370: urllib3, async
+398: urllib3, sync
+
+306: aiohttp, synced
+377: aiohttp, asynced
 
 python -m cProfile -o s.cperf manage.py ucore runserver 0:8000 & python -m cProfile -o c.cperf manage.py utest any simulate --cycles 2000
 

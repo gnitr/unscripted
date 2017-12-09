@@ -12,6 +12,7 @@ from time import sleep
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from unsccore.dbackends.utils import scall
+from django.conf import settings
 
 class Command(BaseCommand):
     help = 'Unscripted core management commands'
@@ -228,10 +229,12 @@ class Command(BaseCommand):
         for botid in botids:
             bot = self.bots.get(botid, None)
             if bot is None:
-                self.bots[botid] = bot = Bot(botid, self.api)
+                self.bots[botid] = bot = Bot(botid)
                 bot.initialise()
-            futures.append(bot.select_and_call_action())
-            #scall(bot.select_and_call_action())
+            if settings.UNSCRIPTED_REQUEST_ASYNC:
+                futures.append(bot.select_and_call_action())
+            else:
+                scall(bot.select_and_call_action())
         
         loop = asyncio.get_event_loop()
         #loop.set_default_executor(ThreadPoolExecutor(1000))

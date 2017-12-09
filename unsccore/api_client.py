@@ -47,7 +47,7 @@ class WSSession(object):
 
 class Urllib3Session(object):
 
-    def __init__(self):
+    def __init__(self, api_root):
         self.session = None
         
     def get_headers(self):
@@ -68,7 +68,7 @@ class Urllib3Session(object):
 
 class PyCurlSession(object):
 
-    def __init__(self):
+    def __init__(self, api_root):
         c = self.c = pycurl.Curl()
         c.setopt(c.CONNECTTIMEOUT, 20)
         c.setopt(c.TIMEOUT, 20)
@@ -105,7 +105,7 @@ class PyCurlSession(object):
 
 class AiohttpSession(object):
 
-    def __init__(self):
+    def __init__(self, api_root):
         self.session = None
 
     def get_headers(self):
@@ -144,14 +144,18 @@ class API_Client(object):
     
         self.api_root = api_root
         
-        if self.api_root.startswith('ws'): 
-            self.session = WSSession(self.api_root)
-        else:
-            # PyCurl is faster than requests
-            #self.session = PyCurlSession()
-            self.session = AiohttpSession()
-            #self.session = Urllib3Session()
-            #self.session = requests.Session()
+        if 0:
+            if self.api_root.startswith('ws'): 
+                self.session = WSSession(self.api_root)
+            else:
+                # PyCurl is faster than requests
+                #self.session = PyCurlSession()
+                self.session = AiohttpSession()
+                #self.session = Urllib3Session()
+                #self.session = requests.Session()
+        request_backend = settings.UNSCRIPTED_REQUEST_BACKEND
+        print('UNSCRIPTED REQUEST BACKEND = %s' % request_backend)
+        self.session = globals()[request_backend](api_root)
         
     async def action(self, targetid, action, **kwargs):
         return await self.send_request('things/%s/actions/%s' %

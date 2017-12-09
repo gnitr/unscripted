@@ -22,7 +22,6 @@ class Bot(object):
         if not ret:
             print('ERROR: could not connect to the API')
         else:
-            import time
             while True:
                 #self.interact(action='walk', target=self.world['id'], angle=random())
                 self.select_and_call_action()
