@@ -9,7 +9,9 @@ import time
 from unsccore.engine import WorldEngine
 from random import random
 from time import sleep
-
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+from unsccore.dbackends.utils import scall
 
 class Command(BaseCommand):
     help = 'Unscripted core management commands'
@@ -18,6 +20,7 @@ class Command(BaseCommand):
         parser.add_argument('worldid', metavar='worldid', nargs=1, type=str)
         parser.add_argument('case', metavar='case', nargs=1, type=str)
         parser.add_argument('--cycles', nargs='?', type=int)
+        parser.add_argument('--stop', action='store_true')
 
     def handle(self, *args, **options):
         self.api = API_Client()
@@ -173,22 +176,22 @@ class Command(BaseCommand):
                     angle=random())
 
     def simulate(self, worldid):
-        from unscbot.models import Bot
-        
+        import uvloop
+        #asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
         self.bins = {}
 
         if worldid == 'any':
-            worldid = self.api.first(module='world')['id']
+            worldid = scall(self.api.first(module='world'))['id']
         print('World %s' % worldid)
 
         limit = self.options.get('cycles')
 
         cycle = -1
 
-        bots = {}
+        self.bots = {}
 
         t0 = time.time()
-
+        
         while True:
             cycle = self.start_new_cycle(cycle)
 
@@ -197,21 +200,14 @@ class Command(BaseCommand):
 
             print('Cycle: %s' % cycle)
             botids = sorted(
-                [t['id'] for t in self.api.find(module='bot', rootid=worldid)])
+                [t['id'] for t in scall(self.api.find(module='bot', rootid=worldid))])
 
             if not botids:
                 break
 
             # TODO: remove dead bots from <bots>
-            for botid in botids:
-                bot = bots.get(botid, None)
-                if bot is None:
-                    bots[botid] = bot = Bot(botid, self.api)
-                    bot.initialise()
-                bot.select_and_call_action()
-
+            self.run_cycle(botids)
             
-
             # world.end_cycle()
             # time.sleep(0.1)
 
@@ -222,7 +218,33 @@ class Command(BaseCommand):
 
         print('%s reqs./s.' % int(limit / (t1 - t0) * 11))
 
-        self.api.stop()
+        if self.options.get('stop'):
+            self.api.stop()
+        
+    def run_cycle(self, botids):
+        futures = []
+        
+        from unscbot.models import Bot
+        for botid in botids:
+            bot = self.bots.get(botid, None)
+            if bot is None:
+                self.bots[botid] = bot = Bot(botid, self.api)
+                bot.initialise()
+            futures.append(bot.select_and_call_action())
+            #scall(bot.select_and_call_action())
+        
+        loop = asyncio.get_event_loop()
+        #loop.set_default_executor(ThreadPoolExecutor(1000))
+        loop.run_until_complete(asyncio.gather(*futures))
+
+    def run_cycle_old(self, botids):
+        from unscbot.models import Bot
+        for botid in botids:
+            bot = self.bots.get(botid, None)
+            if bot is None:
+                self.bots[botid] = bot = Bot(botid, self.api)
+                bot.initialise()
+            bot.select_and_call_action()
         
     def conn(self):
         t0 = time.time()

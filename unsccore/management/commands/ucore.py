@@ -6,6 +6,7 @@ from unsccore import mogels
 from unsccore.api_client import API_Client
 import time
 from unsccore.api import UnscriptedAPI
+from unsccore.dbackends.utils import scall
 
 class Command(BaseCommand):
     help = 'Unscripted core management commands'
@@ -59,12 +60,12 @@ class Command(BaseCommand):
         print('done')
 
     def info(self):
-        worlds = self.api.find(module='world')
+        worlds = scall(self.api.find(module='world'))
         if worlds is None:
             print('ERROR: cannot connect to the API')
         else:
             for world in worlds:
-                things = self.api.find(rootid=world['id'])
+                things = scall(self.api.find(rootid=world['id']))
                 print('%s, %s, %s'  % (world['id'], world['created'], len(things)))
         
     def crunch(self):

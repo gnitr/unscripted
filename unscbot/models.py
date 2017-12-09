@@ -2,17 +2,19 @@
 from __future__ import unicode_literals
 from random import random, randint
 from unsccore.api_client import API_Client
+from unsccore.dbackends.utils import scall, pr
+import time
 
 # Create your models here.
 class Bot(object):
     
-    def __init__(self, botid, api):
+    def __init__(self, botid, api=None):
         self.api = api or API_Client()
         self.botid = botid
         self.items = []
         
     def initialise(self):
-        return self.interact(action='pass')
+        return scall(self.interact(action='pass'))
         
     def live(self):
         ret = self.initialise()
@@ -28,9 +30,9 @@ class Bot(object):
         
         return ret
 
-    def select_and_call_action(self):
+    async def select_and_call_action(self):
         self.select_action()
-        self.call_selected_action()
+        await self.call_selected_action()
     
     def select_action(self):
         actions = [{'action': 'pass'}]
@@ -47,10 +49,10 @@ class Bot(object):
                 self.action[k] = random()
         return self.action
     
-    def call_selected_action(self):
-        self.interact(**self.action)
+    async def call_selected_action(self):
+        await self.interact(**self.action)
 
-    def interact(self, action, targetid=None, **kwargs):
+    async def interact(self, action, targetid=None, **kwargs):
         ret = False
         
         if targetid is None:
@@ -58,8 +60,10 @@ class Bot(object):
         
         # https://stackoverflow.com/questions/17301938/making-a-request-to-a-restful-api-using-python
         kwargs['actorid'] = self.botid
+        kwargs['@context'] = self.botid
         
-        items = self.api.action(targetid, action, **kwargs)
+        items = await self.api.action(targetid, action, **kwargs)
+        #print('select-and-call2.2 %s %s' % (self.botid, time.time()))
         
         if items:
             self.items = items

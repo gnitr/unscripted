@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from websockets.exceptions import ConnectionClosed
 from django.http.request import HttpRequest, QueryDict
 from unsccore.dbackends.utils import json
+from unsccore.dbackends import utils as dbutils 
 
 API_VERSION = '1.0.0'
 
@@ -35,6 +36,7 @@ class UnscriptedAPI(object):
         return API_VERSION.split('.')[0]
 
     def __init__(self):
+        self._threadid = dbutils.get_threadid()
         self._init_env_response()
 
     def _init_env_response(self):
@@ -97,6 +99,9 @@ class UnscriptedAPI(object):
     def process(self, request, path):
         import uuid
 
+        if (self._threadid != dbutils.get_threadid()):
+            raise Exception('Unscripted API should be run in a single thread. Try runserver --nothreading .')
+
         self.errors = []
         self.request = request
         self.path = path
@@ -104,7 +109,7 @@ class UnscriptedAPI(object):
 
         self.response = OrderedDict([
             ['version', self.get_major_version()],
-            ['context', request.GET.get('context', '')],
+            ['context', request.GET.get('@context', '')],
             ['id', uuid.uuid4().hex],
             ['method', ''],
             ['params', request.GET],
@@ -193,9 +198,8 @@ class UnscriptedAPI(object):
                 engine = WorldEngine()
                 api_method = 'thing.action.%s' % action
                 # seems useless, but actually needed b/c GET is a list of lists
-                params = {k: v for k, v in self.request.GET.items()}
                 things = engine.action(
-                    targetid=parentid, action=action, **params)
+                    targetid=parentid, action=action, **request_filters)
             else:
                 if parts:
                     request_filters['pk'] = parts.pop(0)

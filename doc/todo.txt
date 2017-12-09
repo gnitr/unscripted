@@ -1,3 +1,14 @@
+
+Test 7 dec 2017, asus, cp36, simulate 100, rps:
+460: websockets, synced
+170: websockets, async
+240: aiohttp, synced
+X: aiohttp, asynced
+322: Pycurl, synced
+322: Pycurl, async
+266: urllib3, async
+260: urllib3, sync
+
 python -m cProfile -o s.cperf manage.py ucore runserver 0:8000 & python -m cProfile -o c.cperf manage.py utest any simulate --cycles 2000
 
 1. python 3 runserver doesn't save pymemdb collection when ctrl-c is pressed

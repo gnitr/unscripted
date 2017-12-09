@@ -16,6 +16,16 @@ except ImportError:
     print('WARNING: using json (not ujson)')
     import json
 
+def pr(message):
+    import asyncio
+    taskid = str(id(asyncio.Task.current_task()))[-2:]
+    tid = str(get_threadid())[-2:]
+    print('%s %s %s' % (tid, taskid, message))
+
+def scall(coro):
+    import asyncio
+    return asyncio.get_event_loop().run_until_complete(coro)
+    
 def get_pid():
     return os.getpid()
 
