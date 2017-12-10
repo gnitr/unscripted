@@ -13,9 +13,9 @@ Test 9 dec 2017, asus, cp36, simulate 100, rps:
 607: websockets, synced
 170: websockets, async
 *516-769: websockets, async, 1 session per bot
+1000: with buffered stdout
 65: same on pi3
-104: remote, websocket, async (server/pi3 93%, asus 32%)
-
+110: remote, websocket, async (server/pi3 93%, asus 32%)
 
 python -m cProfile -o s.cperf manage.py ucore runserver 0:8000 & python -m cProfile -o c.cperf manage.py utest any simulate --cycles 2000
 

@@ -3,6 +3,7 @@ from unsccore.dbackends.utils import json
 # http://www.angryobjects.com/2011/10/15/http-with-python-pycurl-by-example/
 import time
 import pycurl
+from websockets.exceptions import ConnectionClosed
 # TODO: Works with PyPy but is it more efficient than StringIO?
 try:
     from cStringIO import StringIO as StringIO
@@ -171,7 +172,12 @@ class API_Client(object):
         return res[0]
 
     def stop(self):
-        return scall(self.send_request('stop'))
+        ret = None
+        try:
+            ret = scall(self.send_request('stop'))
+        except ConnectionClosed:
+            pass
+        return ret
     
     async def find(self, **query):
         return await self.request_things(**query)

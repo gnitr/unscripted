@@ -16,6 +16,10 @@ except ImportError:
     print('WARNING: using json (not ujson)')
     import json
 
+
+class UnscriptedStopRequest(Exception):
+    pass
+
 buffer = ''
 
 def pr(message):

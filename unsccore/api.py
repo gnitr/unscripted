@@ -78,13 +78,20 @@ class UnscriptedAPI(object):
         async def websocket_handler(request):
             ws = web.WebSocketResponse()
             await ws.prepare(request)
+            loop = request.loop
             
             request = WSRequest()
             
             async for message in ws:
                 if message.type == aiohttp.WSMsgType.TEXT:
                     #pr('process')
-                    res = await self.process_socket_message(message.data, request)
+                    try:
+                        res = await self.process_socket_message(message.data, request)
+                    except dbutils.UnscriptedStopRequest:
+                        print('Receive STOP request')
+                        loop.stop()
+                        break
+                    
                     #print(res)
                     #pr('respond')
                     await ws.send_str(json.dumps(res))
@@ -113,13 +120,10 @@ class UnscriptedAPI(object):
         async def hello(socket, path):
             try: 
                 while True:
-                    pr('listen')
                     message = await socket.recv()
                     #print(message)
-                    pr('process')
                     res = await self.process_socket_message(message, request)
                     #print(res)
-                    pr('respond')
                     await socket.send(json.dumps(res))
             except ConnectionClosed:
                 print('Connection closed')
@@ -224,7 +228,7 @@ class UnscriptedAPI(object):
             response['env'] = self.res_env
         else:
             if parts[0] == 'stop':
-                exit()
+                raise dbutils.UnscriptedStopRequest('STOP')
             
             parentid = None
             if len(parts) > 2:
