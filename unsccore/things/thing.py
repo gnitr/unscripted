@@ -23,6 +23,8 @@ class Thing(mogels.MongoDocumentModule):
     def __init__(self, **kwargs):
         # last valid parentid value
         self._parentid_valid = 1
+        # a cache
+        self._parent = None
         defaults = {
             'pos': [0.0] * 3,
             'dims': [1.0] * 3,
@@ -45,18 +47,18 @@ class Thing(mogels.MongoDocumentModule):
         return ret
     
     @classmethod
-    def get_objects(cls):
-        ret = super(Thing, cls).get_objects()
+    def _get_objects(cls):
+        ret = super(Thing, cls)._get_objects()
         if cls == Thing:
             # It's a way to clear the filter module=cls
             # so searching with Thing.objects returns all types of things.
             ret.reset_query()
         return ret
 
-    objects = ClassProperty(get_objects)
-    
     def get_parent(self):
-        return Thing.objects.get(pk=self.parentid) if self.parentid else None
+        if self._parent is None or self._parent.pk != self.parentid:
+            self._parent = Thing.objects.get(pk=self.parentid) if self.parentid else None
+        return self._parent
         
     def set_parent(self, parent=None):
         self.parentid = parent.pk if parent else None
@@ -122,6 +124,8 @@ class Thing(mogels.MongoDocumentModule):
         return ret
 
     def is_position_valid(self, cache=None):
+        '''True if thing contained within its parent 
+        AND no other thing intersect with it'''
         ret = False
         obstructing_things = self.get_obstructing_things(cache, True)
         
@@ -151,9 +155,9 @@ class Thing(mogels.MongoDocumentModule):
             if athing.pk == self.pk: continue
             min1, max1 = athing.get_bounding_box()
             if not (min0[0] > max1[0] or min0[2] > max1[2] or min1[0] > max0[0] or min1[2] > max0[2]):
-                 ret.append(athing)
-                 if first_only:
-                     break
+                ret.append(athing)
+                if first_only:
+                    break
                  
         return ret
     

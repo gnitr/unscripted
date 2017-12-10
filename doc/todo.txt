@@ -21,6 +21,8 @@ python -m cProfile -o s.cperf manage.py ucore runserver 0:8000 & sleep 2; python
 
 python -m cProfile -o s.cperf manage.py ucore runserver 0:8001 & sleep 2; python -m cProfile -o c.cperf manage.py utest any simulate --cycles 500 --stop
 
+python -m cProfile -o pa.cperf manage.py utest any pactions --cycles 1000
+
 Why pi3 so slow: 100rps vs 1000rps on asus 
     => pi3 ~10 x slower
 14s: pactions 2000 on pi3
@@ -33,6 +35,7 @@ Why pi3 so slow: 100rps vs 1000rps on asus
     
 Optimise cursor (replace with tuple)
 4.449s: pactions 20000
+2.422s: pactions 20000
 
 => multithreading ?
 

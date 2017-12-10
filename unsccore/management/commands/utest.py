@@ -40,6 +40,10 @@ class Command(BaseCommand):
             self.conn()
             found = 1
 
+        if case == 'dict':
+            found = 1
+            self.dict_test()
+
         if case == 'api':
             api = API_Client()
             res = api.get_things()
@@ -263,3 +267,49 @@ class Command(BaseCommand):
         t1 = time.time()
 
         print('%s reqs./s.' % int(cycles / (t1 - t0)))
+    
+    def dict_test(self):
+        from copy import deepcopy
+        import timeit
+        import ujson
+        import json
+        import _pickle as cPickle
+        
+        d = {'filters': {'f1': 'v1', 'f2': 'v2'}, 'order': ['a', 'b', 'c']}
+        n = 10000
+        
+        # 0.8891989569965517
+        def dcopy(ad):
+            return deepcopy(ad)
+
+        # 0.7031558419985231
+        def dcopy2(ad):
+            return json.loads(json.dumps(ad))
+
+        # 0.182470692001516
+        def dcopy3(ad):
+            return ujson.loads(ujson.dumps(ad))
+
+        # 0.09214928100118414
+        def dcopy4(ad):
+            return {
+                'filters': {k:v for k,v in ad['filters'].items()},
+                'order': [v for v in ad['order']]
+            }
+
+        # 0.21678370899462607
+        def dcopy5(ad):
+            return cPickle.loads(cPickle.dumps(ad))
+
+        # 0.09214928100118414
+        def dcopy6(ad):
+            return dcopy4(ad)
+
+        #print(timeit.timeit('d2 = dcopy(d)', globals=locals(), number=100000))
+        #print(timeit.timeit('d2 = dcopy2(d)', globals=locals(), number=100000))
+        #print(timeit.timeit('d2 = dcopy3(d)', globals=locals(), number=100000))
+        #print(timeit.timeit('d2 = dcopy4(d)', globals=locals(), number=100000))
+        print(timeit.timeit('d2 = dcopy6(d)', globals=locals(), number=100000))
+        
+        print(dcopy6(d))
+        

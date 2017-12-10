@@ -154,6 +154,9 @@ class MongoQuerySet(object):
         # a hash of the last query executed on Mongo by this QuerySet
         self.query_executed_hash = None
         self.reset_query()
+        # Used to prevent expensive cloning when doing this:
+        # Thing.objects.filter()
+#         self._cloned = False
 
     def reset_query(self):
         self.query = {'filters': {}, 'order': None}
@@ -162,9 +165,17 @@ class MongoQuerySet(object):
         pass
 
     def clone(self):
-        import copy
         ret = MongoQuerySet(self.doc_class)
-        ret.query = copy.deepcopy(self.query)
+        
+        # Much faster deep copy than copy.deepcopy
+        #ret.query = copy.deepcopy(self.query)
+        q = self.query
+        ret.query = {
+            'filters': {k:v for k,v in q['filters'].items()},
+            'order': [v for v in q['order'] or []]
+        }
+        
+#         ret._cloned = True
         return ret
 
     def save(self):
@@ -223,22 +234,6 @@ class MongoQuerySet(object):
     def __iter__(self):
         return iter(self._get_cursor())
     
-#     def __next__(self):
-#         return self._get_next()
-# 
-#     def _get_next(self, limit=0):
-#         cursor = self.cursor
-# #         if limit:
-# #             cursor.limit(limit)
-#         ret = cursor.__next__()
-#         #ret = self.doc_class.new(**doc)
-#         return ret
-# 
-#     def __getitem__(self, idx):
-#         # can raise IndexError
-#         cursor = self._get_cursor()
-#         return cursor[idx]
-
     def _get_collection(self):
         # TODO: cache?
         return self._collection
