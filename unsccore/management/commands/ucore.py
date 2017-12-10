@@ -87,6 +87,9 @@ class Command(BaseCommand):
         q.create_index('module', unique=False)
         
     def runserver(self):
+        import asyncio, uvloop
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
         hostname, port = ('localhost', '8000')
         if self.cargs:
             parts = self.cargs[0].split(':')

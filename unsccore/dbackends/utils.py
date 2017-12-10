@@ -16,11 +16,18 @@ except ImportError:
     print('WARNING: using json (not ujson)')
     import json
 
+buffer = ''
+
 def pr(message):
+    global buffer
     import asyncio
     taskid = str(id(asyncio.Task.current_task()))[-2:]
     tid = str(get_threadid())[-2:]
-    print('%s %s %s' % (tid, taskid, message))
+    buffer += ('%s %s %s\n' % (tid, taskid, message))
+    if len(buffer) > 2000:
+        print(buffer)
+        buffer = ''
+    #print('%s %s %s' % (tid, taskid, message))
 
 def scall(coro):
     import asyncio

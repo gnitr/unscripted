@@ -11,8 +11,8 @@ from random import random
 from time import sleep
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-from unsccore.dbackends.utils import scall
 from django.conf import settings
+from unsccore.dbackends.utils import scall, pr
 
 class Command(BaseCommand):
     help = 'Unscripted core management commands'
@@ -131,7 +131,7 @@ class Command(BaseCommand):
                 target_speed_ratio = 100
                 target_speed = (1.0 / walking_step_duration) * \
                     target_population * target_speed_ratio
-                print('%.2fs cycles/s (%.2f x slower). %d cycles in %.2f s' % (speed, target_speed / speed, cycle_window, elapsed))
+                pr('%.2fs cycles/s (%.2f x slower). %d cycles in %.2f s' % (speed, target_speed / speed, cycle_window, elapsed))
 
 #                 world.perf = {
 #                     'cycle_per_second': speed,
@@ -178,7 +178,7 @@ class Command(BaseCommand):
 
     def simulate(self, worldid):
         import uvloop
-        #asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
         self.bins = {}
 
         if worldid == 'any':
@@ -199,7 +199,7 @@ class Command(BaseCommand):
             if limit is not None and cycle >= limit:
                 break
 
-            print('Cycle: %s' % cycle)
+            pr('Cycle: %s' % cycle)
             botids = sorted(
                 [t['id'] for t in scall(self.api.find(module='bot', rootid=worldid))])
 

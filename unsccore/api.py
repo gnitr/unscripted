@@ -5,19 +5,25 @@ from django.core.exceptions import ObjectDoesNotExist
 from websockets.exceptions import ConnectionClosed
 from django.http.request import HttpRequest, QueryDict
 from unsccore.dbackends.utils import json
-from unsccore.dbackends import utils as dbutils 
+from unsccore.dbackends import utils as dbutils
+from unsccore.dbackends.utils import pr
+import asyncio 
 
 API_VERSION = '1.0.0'
 
 class WSRequest(HttpRequest):
     
-    def __init__(self, message, api_root=''):
+    def __init__(self, *args, **kwargs):
         super(WSRequest, self).__init__()
-        parts = message.split('?')
-        self.api_path = parts.pop(0)
-        self.path = self.api_path
-        self.qs = parts.pop(0) if parts else ''
-        self.GET = QueryDict(self.qs)
+        self.reset( *args, **kwargs)
+        
+    def reset(self, message=None, api_root=''):
+        if message:
+            parts = message.split('?')
+            self.api_path = parts.pop(0)
+            self.path = self.api_path
+            self.qs = parts.pop(0) if parts else ''
+            self.GET = QueryDict(self.qs)
         self.method = 'GET'
         # TODO: dynamic
         self.META = {'HTTP_HOST': '127.0.0.1'}
@@ -62,41 +68,80 @@ class UnscriptedAPI(object):
         }
 
     def listen_to_websocket(self, hostname='127.0.0.1', port=8000):
-        import asyncio
+        # slightly faster than websockets implementation
+        import aiohttp
+        from aiohttp import web
+        
+        if hostname == '0':
+            hostname = '0.0.0.0'
+        
+        async def websocket_handler(request):
+            ws = web.WebSocketResponse()
+            await ws.prepare(request)
+            
+            request = WSRequest()
+            
+            async for message in ws:
+                if message.type == aiohttp.WSMsgType.TEXT:
+                    #pr('process')
+                    res = await self.process_socket_message(message.data, request)
+                    #print(res)
+                    #pr('respond')
+                    await ws.send_str(json.dumps(res))
+                    #pr('listen')
+                elif message.type == aiohttp.WSMsgType.ERROR:
+                    print('ws connection closed with exception %s' %
+                          ws.exception())
+        
+            print('websocket connection closed')
+        
+            return ws
+        
+        app = web.Application()
+        app.router.add_get('/', websocket_handler)
+        web.run_app(app, host=hostname, port=int(port))
+
+    def listen_to_websocket1(self, hostname='127.0.0.1', port=8000):
         import websockets
         
         if hostname == '0':
             hostname = '0.0.0.0'
+            
+        request = WSRequest()
         
         # TODO: check path = api/1
         async def hello(socket, path):
             try: 
                 while True:
+                    pr('listen')
                     message = await socket.recv()
                     #print(message)
-                    res = self.process_socket_message(message)
+                    pr('process')
+                    res = await self.process_socket_message(message, request)
                     #print(res)
+                    pr('respond')
                     await socket.send(json.dumps(res))
             except ConnectionClosed:
                 print('Connection closed')
-        
+
         start_server = websockets.serve(hello, hostname, port)
         
         asyncio.get_event_loop().run_until_complete(start_server)
         asyncio.get_event_loop().run_forever()
 
-    def get_status(self):
+    def get_status(self, response):
         ret = 200
-        if 'error' in self.response:
-            ret = self.response['error']['code']
+        if 'error' in response:
+            ret = response['error']['code']
         return ret
 
-    def process_socket_message(self, message):
+    async def process_socket_message(self, message, request):
         # e.g. message = 'worlds/X/things?module=bot&@method=GET'
-        request = WSRequest(message)
-        return self.process(request, request.get_api_path())
+        #request = WSRequest(message)
+        request.reset(message)
+        return await self.process(request, request.get_api_path())
 
-    def process(self, request, path):
+    async def process(self, request, path):
         import uuid
 
         if (self._threadid != dbutils.get_threadid()):
@@ -107,7 +152,7 @@ class UnscriptedAPI(object):
         self.path = path
         self.method = request.GET.get('@method', request.method).upper()
 
-        self.response = OrderedDict([
+        response = OrderedDict([
             ['version', self.get_major_version()],
             ['context', request.GET.get('@context', '')],
             ['id', uuid.uuid4().hex],
@@ -116,21 +161,21 @@ class UnscriptedAPI(object):
             ['data', {}],
         ])
 
-        self._process()
+        await self._process(response)
 
         if self.errors:
-            del self.response['data']
-            self.response['error'] = {
+            del response['data']
+            response['error'] = {
                 'errors': self.errors
             }
             max_code = 0
             for error in self.errors:
                 if max_code < error['code']:
                     max_code = error['code']
-                    self.response['error']['message'] = error['message']
-                    self.response['error']['code'] = max_code
+                    response['error']['message'] = error['message']
+                    response['error']['code'] = max_code
 
-        return self.response
+        return response
 
     def get_links_from_thing(self, thing):
         ret = []
@@ -156,11 +201,11 @@ class UnscriptedAPI(object):
             ret['_class'] = thing.__class__.__name__
         return ret
 
-    def _process(self):
+    async def _process(self, response):
         # TODO: too long, break into sub-methods
         parts = [p for p in self.path.strip('/').split('/') if p]
 
-        self.response['method'] = ''
+        response['method'] = ''
         api_method = None
         data_items = []
         data = {}
@@ -176,7 +221,7 @@ class UnscriptedAPI(object):
 
         if len(parts) < 1:
             api_method = 'api.get'
-            self.response['env'] = self.res_env
+            response['env'] = self.res_env
         else:
             if parts[0] == 'stop':
                 exit()
@@ -198,6 +243,7 @@ class UnscriptedAPI(object):
                 engine = WorldEngine()
                 api_method = 'thing.action.%s' % action
                 # seems useless, but actually needed b/c GET is a list of lists
+                await asyncio.sleep(0)
                 things = engine.action(
                     targetid=parentid, action=action, **request_filters)
             else:
@@ -252,8 +298,8 @@ class UnscriptedAPI(object):
             data['count'] = len(data['items'])
             data['total_count'] = data['count']
 
-            self.response['method'] = api_method
-            self.response['data'] = data
+            response['method'] = api_method
+            response['data'] = data
         else:
             self.errors.append({
                 'code': 404,
