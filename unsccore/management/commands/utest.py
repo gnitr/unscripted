@@ -257,7 +257,7 @@ class Command(BaseCommand):
         o = 0
         for i in range(cycles):
             # print i
-            r = self.api.send_request('', i=i)
+            r = scall(self.api.send_request('', i=i))
             # sleep(0.00001)
 
         t1 = time.time()

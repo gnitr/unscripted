@@ -17,7 +17,19 @@ Test 9 dec 2017, asus, cp36, simulate 100, rps:
 65: same on pi3
 110: remote, websocket, async (server/pi3 93%, asus 32%)
 
-python -m cProfile -o s.cperf manage.py ucore runserver 0:8000 & python -m cProfile -o c.cperf manage.py utest any simulate --cycles 2000
+python -m cProfile -o s.cperf manage.py ucore runserver 0:8000 & sleep 2; python -m cProfile -o c.cperf manage.py utest any simulate --cycles 2000 --stop
+
+python -m cProfile -o s.cperf manage.py ucore runserver 0:8001 & sleep 2; python -m cProfile -o c.cperf manage.py utest any simulate --cycles 500 --stop
+
+Why pi3 so slow: 100rps vs 1000rps on asus 
+    => pi3 ~10 x slower
+14s: pactions 2000 on pi3
+1.6: pactions 2000 on asus 
+    => pi3 ~10 x slower
+    => speed limit for pure logic (excluding the communication) is 1250 walking steps /s ???
+2703: conns (asus, aiohttp>websockets) 
+
+=> multithreading ?
 
 1. python 3 runserver doesn't save pymemdb collection when ctrl-c is pressed
     pm runserver 0:8000 --nothreading --noreload

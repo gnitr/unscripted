@@ -147,7 +147,7 @@ class UnscriptedAPI(object):
 
     async def process(self, request, path):
         import uuid
-
+        
         if (self._threadid != dbutils.get_threadid()):
             raise Exception('Unscripted API should be run in a single thread. Try runserver --nothreading .')
 

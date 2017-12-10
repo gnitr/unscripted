@@ -40,8 +40,12 @@ class Bot(object):
             for action in item.get('actions', []):
                 action['targetid'] = item['id']
                 actions.append(action)
+#                 if action['action'] == 'walk':
+#                     self.action = action
         # select a random action from the array
+        
         self.action = actions[randint(0, len(actions) - 1)]
+        
         # select random values to the action arguments
         for k in self.action.keys():
             if k not in ['action', 'targetid']:
