@@ -169,7 +169,7 @@ class Command(BaseCommand):
         if abot:
             print('bot %s %s' % (abot.pk, abot.name))
             for i in range(limit):
-                print(i)
+                #pr(i)
                 engine.action(
                     targetid=world.pk,
                     action='walk',

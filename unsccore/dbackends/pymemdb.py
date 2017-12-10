@@ -1,7 +1,9 @@
 '''
 A simple & native python in-memory object collection.
 Collections can be saved to and loaded from disk.
-Single thread, single process.
+Objects are serialised as json documents.
+
+SINGLE THREAD & SINGLE PROCESS
 
 Author: Geoffroy Noel
 '''
@@ -98,12 +100,13 @@ class Collection(object):
         print('COLLECTION READ (%s)' % (get_collection_size_info(self._id_docs, content)))
     
     def find(self, query):
+        #print(query)
         ret = []
         
         if len(query) == 1:
             m = self._id_docs.get(query.get('pk'))
             if m:
-                return Cursor([m])
+                return [m]
         
         # TODO: use views!
         for model in self._id_docs.values():
@@ -117,7 +120,7 @@ class Collection(object):
             if match:
                 ret.append(model)
 
-        return Cursor(ret)
+        return ret
 
     def insert_one(self, model):
         # TODO: check for duplicates
@@ -133,38 +136,6 @@ class Collection(object):
     def delete_one(self, model):
         if str(model.pk) in self._id_docs:
             del self._id_docs[str(model.pk)]
-
-
-class Cursor(object):
-
-    def __init__(self, results):
-        self.limit()
-        self.results = results
-        self.pos = -1
-
-    def count(self):
-        ret = len(self.results)
-        if self._limit and self._limit < ret:
-            ret = self._limit
-        return ret
-
-    def __next__(self):
-        self.pos += 1
-        if self.pos >= self.count():
-            raise StopIteration
-        return self.results[self.pos]
-
-    def sort(self, orders):
-        raise Exception('Sort not yet supported')
-
-    def limit(self, limit=0):
-        self._limit = limit
-
-    def __iter__(self):
-        return self
-
-    def __item__(self, idx):
-        return self.results[idx]
 
 
 class MongoQuerySet(object):
@@ -217,6 +188,7 @@ class MongoQuerySet(object):
 
     def filter(self, **filters):
         '''Django QuerySet method, returns a COPY.'''
+        #print(filters)
         ret = self.clone()
         if filters:
             ret.query['filters'].update(filters)
@@ -225,8 +197,8 @@ class MongoQuerySet(object):
     def first(self):
         '''Django QuerySet method, returns a model or None.'''
         try:
-            self._get_cursor()
-            return self._get_next(1)
+            for ret in self:
+                return ret
         except StopIteration:
             return None
 
@@ -241,7 +213,7 @@ class MongoQuerySet(object):
 
     def count(self):
         '''Django QuerySet method, returns number of objects in queryset.'''
-        return self._get_cursor().count()
+        return len(self._get_cursor())
 
     def order_by(self, *fields):
         '''Django QuerySet method, returns a COPY.'''
@@ -249,25 +221,23 @@ class MongoQuerySet(object):
         return self
 
     def __iter__(self):
-        ret = self.clone()
-        ret._get_cursor()
-        return ret
+        return iter(self._get_cursor())
     
-    def __next__(self):
-        return self._get_next()
-
-    def _get_next(self, limit=0):
-        cursor = self.cursor
-        if limit:
-            cursor.limit(limit)
-        ret = cursor.__next__()
-        #ret = self.doc_class.new(**doc)
-        return ret
-
-    def __getitem__(self, idx):
-        # can raise IndexError
-        cursor = self._get_cursor()
-        return cursor[idx]
+#     def __next__(self):
+#         return self._get_next()
+# 
+#     def _get_next(self, limit=0):
+#         cursor = self.cursor
+# #         if limit:
+# #             cursor.limit(limit)
+#         ret = cursor.__next__()
+#         #ret = self.doc_class.new(**doc)
+#         return ret
+# 
+#     def __getitem__(self, idx):
+#         # can raise IndexError
+#         cursor = self._get_cursor()
+#         return cursor[idx]
 
     def _get_collection(self):
         # TODO: cache?

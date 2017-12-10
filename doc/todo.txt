@@ -27,7 +27,12 @@ Why pi3 so slow: 100rps vs 1000rps on asus
 1.6: pactions 2000 on asus 
     => pi3 ~10 x slower
     => speed limit for pure logic (excluding the communication) is 1250 walking steps /s ???
-2703: conns (asus, aiohttp>websockets) 
+2703: conns (asus, aiohttp>websockets)
+250: pi3
+    => pi3 connections are also 10 x slower 
+    
+Optimise cursor (replace with tuple)
+4.449s: pactions 20000
 
 => multithreading ?
 

@@ -251,8 +251,10 @@ class UnscriptedAPI(object):
                 things = engine.action(
                     targetid=parentid, action=action, **request_filters)
             else:
+                expect_one = 0
                 if parts:
                     request_filters['pk'] = parts.pop(0)
+                    expect_one = 1
                 if resource_type and resource_type != 'things':
                     request_filters['module'] = self.get_singular(
                         resource_type)
@@ -267,15 +269,21 @@ class UnscriptedAPI(object):
 
                     api_method = '%s.get' % resource_type
                     things = Thing.objects.filter(**request_filters)
-
-                    if self.method == 'DELETE':
-                        api_method = '%s.delete' % resource_type
-                        for thing in things:
-                            thing.delete()
-                        things = []
-
-                    if self.method == 'HEAD':
-                        things = []
+                    
+                    if expect_one and things.count() != 1:
+                        self.errors.append({
+                            'code': 404,
+                            'message': 'Thing not found'
+                        })
+                    else:
+                        if self.method == 'DELETE':
+                            api_method = '%s.delete' % resource_type
+                            for thing in things:
+                                thing.delete()
+                            things = []
+    
+                        if self.method == 'HEAD':
+                            things = []
 
                 if self.method == 'POST':
                     api_method = '%s.post' % resource_type
