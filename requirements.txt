@@ -13,3 +13,6 @@ pycurl
 # conda install -c conda-forge uwsgi
 future
 ujson
+uvloop
+aiohttp
+websockets

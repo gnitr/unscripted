@@ -81,8 +81,8 @@ Optimisation:
         # 1000 * 10 simulation reqs / 47s => 212 / s
         
         # Targets (assuming 70 years, and one day):
-        # = 10 cycles / s   => 7 years, 2.5 hours  (100 rq/s)
-        #   100             => 9 months, 15 mins   (1000 rq/s)
+        #   10 cycles / s   => 7 years, 2.5 hours  (100 rq/s)
+        # = 100             => 9 months, 15 mins   (1000 rq/s)
         # + 1000            => 1 months, 1.5 mins
         #   10000           => 8 hours
         

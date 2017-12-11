@@ -82,9 +82,9 @@ class Command(BaseCommand):
         print('Empty the world')
 
         if worldid == 'any':
-            world = self.api.first(module='world')
+            world = scall(self.api.first(module='world'))
         else:
-            world = self.api.first(id=worldid)
+            world = scall(self.api.first(id=worldid))
 
         if world is None:
             print('ERROR: world not found')
@@ -92,19 +92,19 @@ class Command(BaseCommand):
 
         worldid = world['id']
 
-        for thing in self.api.find(rootid=worldid):
+        for thing in scall(self.api.find(rootid=worldid)):
             if thing['id'] != worldid:
-                self.api.delete(id=thing['id'])
+                scall(self.api.delete(id=thing['id']))
 
         female = 1
         # while True:
         for i in range(10):
             try:
-                self.api.create(
+                scall(self.api.create(
                     module='bot',
                     parentid=worldid,
                     female=female,
-                    rootid=worldid)
+                    rootid=worldid))
             except UnscriptedApiError:
                 break
             female = 1 - female
@@ -117,7 +117,7 @@ class Command(BaseCommand):
         worldid = self.repop(worldid)
 
         for i in range(0, 2):
-            self.api.create(module='well', parentid=worldid, rootid=worldid)
+            scall(self.api.create(module='well', parentid=worldid, rootid=worldid))
 
     def start_new_cycle(self, cycle):
         cycle += 1
@@ -301,7 +301,7 @@ class Command(BaseCommand):
         def dcopy5(ad):
             return cPickle.loads(cPickle.dumps(ad))
 
-        # 0.09214928100118414
+        # 0.11...
         def dcopy6(ad):
             return dcopy4(ad)
 

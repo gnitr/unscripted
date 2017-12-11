@@ -42,7 +42,7 @@ class Command(BaseCommand):
             found = 1
 
         if action == 'new':
-            self.api.create(module='world')
+            scall(self.api.create(module='world'))
             found = 1
 
         if action == 'reindex':
@@ -69,7 +69,7 @@ class Command(BaseCommand):
                 print('%s, %s, %s'  % (world['id'], world['created'], len(things)))
         
     def crunch(self):
-        self.api.delete()
+        scall(self.api.delete())
         
     def compile(self):
         ret = Thing.cache_actions()
