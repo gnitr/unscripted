@@ -1,4 +1,5 @@
 from unsccore.things.thing import Thing
+from unsccore.dbackends.utils import pr
 
 vision_radius = 50.0
 action_radius = 1
@@ -29,7 +30,7 @@ class WorldEngine(object):
                     if targets:
                         action_method(actor=actor, **kwargs)
                     else:
-                        print('Not within reach')
+                        pr('Not within reach')
                         pass
                 else:
                     raise EngineError('Unknown action "%s"' % action)

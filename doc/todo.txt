@@ -1,4 +1,51 @@
-pm ucore crunch; pm ucore new; pm utest any repop_well
+
+Test 9 dec 2017, asus, cp36, simulate 100, rps:
+
+306: aiohttp, synced
+377: aiohttp, asynced
+
+370: urllib3, async
+398: urllib3, sync
+
+470: Pycurl, synced
+490: Pycurl, async
+
+607: websockets, synced
+170: websockets, async
+*516-769: websockets, async, 1 session per bot
+1000: with buffered stdout
+65: same on pi3
+110: remote, websocket, async (server/pi3 93%, asus 32%)
+
+python -m cProfile -o s.cperf manage.py ucore runserver 0:8000 & sleep 2; python -m cProfile -o c.cperf manage.py utest any simulate --cycles 2000 --stop
+
+python -m cProfile -o s.cperf manage.py ucore runserver 0:8001 & sleep 2; python -m cProfile -o c.cperf manage.py utest any simulate --cycles 500 --stop
+
+python -m cProfile -o pa.cperf manage.py utest any pactions --cycles 1000
+
+Why pi3 so slow: 100rps vs 1000rps on asus 
+    => pi3 ~10 x slower
+14s: pactions 2000 on pi3
+1.6: pactions 2000 on asus 
+    => pi3 ~10 x slower
+    => speed limit for pure logic (excluding the communication) is 1250 walking steps /s ???
+2703: conns (asus, aiohttp>websockets)
+250: pi3
+    => pi3 connections are also 10 x slower 
+    
+Optimise cursor (replace with tuple)
+4.449s: pactions 20000
+2.422s: pactions 20000
+
+=> multithreading ?
+
+1. python 3 runserver doesn't save pymemdb collection when ctrl-c is pressed
+    pm runserver 0:8000 --nothreading --noreload
+2. seg fault with pypy server when running a simulation
+    caused by ujson (works well when use json instead)
+3. pi3 64 bits is much slower than 32bits, why?
+
+pm ucore uncache && pm ucore crunch && pm ucore new && pm utest any repop_well
 gunicorn -w 1 unscripted.wsgi:application
 
 Optimisation:
@@ -34,10 +81,28 @@ Optimisation:
         # 1000 * 10 simulation reqs / 47s => 212 / s
         
         # Targets (assuming 70 years, and one day):
-        # = 10 cycles / s   => 7 years, 2.5 hours  (100 rq/s)
-        #   100             => 9 months, 15 mins   (1000 rq/s)
+        #   10 cycles / s   => 7 years, 2.5 hours  (100 rq/s)
+        # = 100             => 9 months, 15 mins   (1000 rq/s)
         # + 1000            => 1 months, 1.5 mins
-        #   10000           => 8 hours 
+        #   10000           => 8 hours
+        
+        # 650 rps asus c36 websockets (local simulation)
+        # 514 c36<-pypy3
+        # 258 rps pypy3
+        # 281 pypy3<-c36
+        => pypy on server side is much slower
+        Ceilings:
+        pactions 2631 rps (c36)
+        conn 2450 rps (c36)
+        What's missing is the encode/decode + list of bots
+        if we assume conn & pactions are cumulative => 1/(1/2631 + 1/2450) = 1268 rps
+        => around half the time is unaccounted for in simulate, what is it?
+        => then we can increase it by using green threads
+        # sim c35 from pi3 to asus: 53rps
+        # sim c35 pi3 internally: 83 rps
+        # conn c35 pi3 210 rps
+        => optimise pi3
+        => asyncio
         
         TODO:
         * - replace django with something else: 
@@ -66,7 +131,7 @@ Optimisation:
             - curl -Iv http://127.0.0.1:8000/api/1/ --next http://127.0.0.1:8000/api/1/ 2>&1
             => NOT with runserver; OK with uwsgi; OK with bjoern
         - use pypy
-            DONE try json alternatives:
+         DONE try json alternatives:
             - ujson (CPython only): OK, but for simple message, not a big difference (<10%) 
             - msgpack
             - pypy

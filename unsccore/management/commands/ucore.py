@@ -5,15 +5,19 @@ from unsccore.things.world import World
 from unsccore import mogels
 from unsccore.api_client import API_Client
 import time
+from unsccore.api import UnscriptedAPI
+from unsccore.dbackends.utils import scall
 
 class Command(BaseCommand):
     help = 'Unscripted core management commands'
 
     def add_arguments(self, parser):
         parser.add_argument('action', metavar='action', nargs=1, type=str)
+        parser.add_argument('cargs', metavar='cargs', nargs='*', type=str)
 
     def handle(self, *args, **options):
         self.options = options
+        self.cargs = options['cargs']
         
         self.api = API_Client()
         
@@ -21,6 +25,10 @@ class Command(BaseCommand):
         
         found = 0
         
+        if action == 'runserver':
+            self.runserver()
+            found = 1
+
         if action == 'compile':
             self.compile()
             found = 1
@@ -34,7 +42,7 @@ class Command(BaseCommand):
             found = 1
 
         if action == 'new':
-            self.api.create(module='world')
+            scall(self.api.create(module='world'))
             found = 1
 
         if action == 'reindex':
@@ -52,16 +60,16 @@ class Command(BaseCommand):
         print('done')
 
     def info(self):
-        worlds = self.api.find(module='world')
+        worlds = scall(self.api.find(module='world'))
         if worlds is None:
             print('ERROR: cannot connect to the API')
         else:
             for world in worlds:
-                things = self.api.find(rootid=world['id'])
+                things = scall(self.api.find(rootid=world['id']))
                 print('%s, %s, %s'  % (world['id'], world['created'], len(things)))
         
     def crunch(self):
-        self.api.delete()
+        scall(self.api.delete())
         
     def compile(self):
         ret = Thing.cache_actions()
@@ -77,5 +85,21 @@ class Command(BaseCommand):
         q.create_index('parentid', unique=False)
         q.create_index('rootid', unique=False)
         q.create_index('module', unique=False)
+        
+    def runserver(self):
+        import asyncio, uvloop
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+        hostname, port = ('localhost', '8000')
+        if self.cargs:
+            parts = self.cargs[0].split(':')
+            if parts[0]:
+                hostname = parts[0]
+            if len(parts) > 1:
+                port = parts[1]
+        print('Websocket server running on %s:%s' % (hostname, port))
+        
+        server = UnscriptedAPI()
+        server.listen_to_websocket(hostname, port)
         
     

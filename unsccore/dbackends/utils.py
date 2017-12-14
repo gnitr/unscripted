@@ -1,16 +1,42 @@
 try:
-  basestring
+    basestring
 except NameError:
-  basestring = str
+    # python 3
+    basestring = str
 from bson.objectid import ObjectId
 import re
+import platform
 import os
 try:
     import ujson as json
+    if 'pypy' in platform.python_implementation().lower():
+        print('INFO: ujson cause seg fault on pypy')
+        raise ImportError
 except ImportError:
+    print('WARNING: using json (not ujson)')
     import json
 
 
+class UnscriptedStopRequest(Exception):
+    pass
+
+buffer = ''
+
+def pr(message):
+    global buffer
+    import asyncio
+    taskid = str(id(asyncio.Task.current_task()))[-2:]
+    tid = str(get_threadid())[-2:]
+    buffer += ('%s %s %s\n' % (tid, taskid, message))
+    if len(buffer) > 2000:
+        print(buffer)
+        buffer = ''
+    #print('%s %s %s' % (tid, taskid, message))
+
+def scall(coro):
+    import asyncio
+    return asyncio.get_event_loop().run_until_complete(coro)
+    
 def get_pid():
     return os.getpid()
 
@@ -43,8 +69,8 @@ def get_key_from_class_name(class_name):
     return re.sub(r'([A-Z])', r'_\1', class_name).strip('_').lower()
 
 
-def get_mongo_dict_from_model(model):
-    ret = _get_mongo_dict_from_model_dict(model.__dict__)
+def get_mongo_dict_from_model(model, plain_id=False):
+    ret = _get_mongo_dict_from_model_dict(model.__dict__, plain_id=plain_id)
     # A bit special, .module is a class variable and therefore not part
     # of __dict__, it's thus treated slightly differently.
     ret['module'] = model.module
@@ -54,7 +80,7 @@ def get_mongo_dict_from_model(model):
 # Mongo DB document, Django Model __dict__ and Web API json dict
 
 
-def _get_mongo_dict_from_model_dict(d):
+def _get_mongo_dict_from_model_dict(d, plain_id=False):
     ret = {}
     for k, v in d.items():
         if callable(v):
@@ -66,8 +92,8 @@ def _get_mongo_dict_from_model_dict(d):
         if k == '_id' and v is None:
             continue
         if isinstance(v, dict):
-            v = _get_mongo_dict_from_model_dict(v)
-        elif isinstance(v, basestring) and len(v) == len('59ea5544274d0a2924d8b06b') and k.endswith('id'):
+            v = _get_mongo_dict_from_model_dict(v, plain_id=plain_id)
+        elif not plain_id and isinstance(v, basestring) and len(v) == len('59ea5544274d0a2924d8b06b') and k.endswith('id'):
             v = ObjectId(v)
         ret[k] = v
     return ret

@@ -30,7 +30,6 @@ class MongoModel(object):
     are used both like django model attributes and
     mongodb field.
 
-    _get_doc and _set_doc do the conversion
     between the dajngo model and mongo document.
 
     The primary key field is called 'pk', NOT 'id'.
@@ -96,6 +95,7 @@ class MongoDocumentModule(with_metaclass(MongoDocumentModuleMeta, MongoModel)):
 
     # e.g. {'bot': <Bot>, ...}
     _ccache = {'modules_class': {}}
+    _objects = None
 
     def __init__(self, **kwargs):
         self.created = time.time()
@@ -134,11 +134,17 @@ class MongoDocumentModule(with_metaclass(MongoDocumentModuleMeta, MongoModel)):
 
     @classmethod
     def get_objects(cls):
+        if cls._objects is None:
+            cls._objects = cls._get_objects()
+        return cls._objects
+
+    objects = dbutils.ClassProperty(get_objects)
+
+    @classmethod
+    def _get_objects(cls):
         ret = super(MongoDocumentModule, cls).get_objects()
         ret = ret.filter(module=cls.module)
         return ret
-
-    objects = dbutils.ClassProperty(get_objects)
 
 #     @classmethod
 #     def get_module_key(cls):
