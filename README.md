@@ -54,7 +54,7 @@ That's 10mx10m world with 10 bots and 2 wells.
 * new bots replace dead ones
 * bots still chose actions randomly
 
-## 0.3: Optimisations (started Nov 2017)
+## 0.3: Optimisations (completed Jan 2018)
 
 * add a backend system to manage collection of things: mongodb, in-memory (pymemdb) (done)
 * make the client and server work on separate computer (done)
@@ -65,12 +65,15 @@ That's 10mx10m world with 10 bots and 2 wells.
 
 This stage is necessary as I realised that the engine on the server-side is extremely slow. We want the bots to live many times faster than in real time otherwise it will take years to see an emerence of adaptation. Read the discussion about [the speed of virtual life in the Wiki](https://github.com/gnitr/unscripted/wiki/The-Speed-of-Life-&-Learning).
 
-## 0.4: Adaptive Mind (starting Dec 2017)
+## 0.4: Update the visualisation (Starting Feb 2018)
+* repair the web based visualisation of the world so it works with websocket server instead of the http server
+
+## 0.5: Adaptive Mind (starting Feb/March 2017)
 
 * create a very basic but working model of a bot mind, possibly neural net
 * introduce a basic mechanism for allowing adaptation
 
-## 0.5: Genetic transmission
+## 0.6: Genetic transmission
 
 * genome = a serialised mind
 * species = a type of model for a mind and its serialisation format
@@ -79,7 +82,7 @@ This stage is necessary as I realised that the engine on the server-side is extr
 
 Those simple ingredients should be enough trigger the evolutionary process. This is when things starts to become really interesting and move in many directions.
 
-## 0.6: Public Demo
+## 0.7: Public Demo
 
 * keep revising and optimising the system until we can see the emergence and transmission of behaviours
 * add complexity to the world (other situations, resources, things)
