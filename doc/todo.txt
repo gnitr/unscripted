@@ -1,3 +1,6 @@
+pm ucore runserver
+pm utest 5a236bf5274d0a150d66ee5f simulate --cycles=100
+
 
 Test 9 dec 2017, asus, cp36, simulate 100, rps:
 

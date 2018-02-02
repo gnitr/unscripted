@@ -56,8 +56,21 @@ class Command(BaseCommand):
 
         if not found:
             print('ERROR: action not found (%s)' % action)
+            print(self.get_help_string())
         
         print('done')
+        
+    def get_help_string(self):
+        return '''
+actions:
+    new
+    info
+    crunch
+    compile
+    runserver
+    reindex
+    uncache
+        '''
 
     def info(self):
         worlds = scall(self.api.find(module='world'))

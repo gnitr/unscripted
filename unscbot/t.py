@@ -1,6 +1,13 @@
 import torch
+import torch.nn
+import torch.optim as optim
 import math
 from torch.autograd import Variable
+
+learning_rate = 1e-8
+early_stop = 0.01
+max_iterations = int(1e4)
+hidden_size = 2
 
 # N is batch size; D_in is input dimension;
 # H is hidden dimension; D_out is output dimension.
@@ -8,13 +15,14 @@ N, D_in, H1, H2, D_out = 64, 1000, 1000, 1000, 50
 
 
 def f1(a, b):
+    #return a ** 2.0 + b / 2.0
     return a * 2.0 + b / 2.0
 
 
 xs = []
 ys = []
-for i in range(0, 100, 10):
-    for i2 in range(0, 100, 10):
+for i in range(100, 200, 10):
+    for i2 in range(100, 200, 10):
         ax = [float(i), float(i2)]
         xs.append(ax)
         ys.append([f1(*ax)])
@@ -22,7 +30,7 @@ for i in range(0, 100, 10):
 N = len(xs)
 D_in = len(xs[0])
 D_out = len(ys[0])
-H1 = 2
+H1 = hidden_size
 H2 = H1
 
 # Create random Tensors to hold inputs and outputs, and wrap them in Variables.
@@ -39,8 +47,14 @@ y = Variable(torch.FloatTensor(ys), requires_grad=False)
 model = torch.nn.Sequential(
     torch.nn.Linear(D_in, H1),
     torch.nn.Sigmoid(),
-    # torch.nn.ReLU(),
-    torch.nn.Linear(H1, D_out),
+    #torch.nn.ReLU(),
+    #torch.nn.ELU(),
+    
+    #torch.nn.Linear(H1, H2),
+    #torch.nn.ReLU(),
+    #torch.nn.ELU(),
+
+    torch.nn.Linear(H2, D_out),
     # torch.nn.Sigmoid(),
     #torch.nn.Linear(H2, D_out),
 )
@@ -49,9 +63,11 @@ model = torch.nn.Sequential(
 # case we will use Mean Squared Error (MSE) as our loss function.
 loss_fn = torch.nn.MSELoss(size_average=False)
 
-learning_rate = 1e-6
-early_stop = 1
-for t in range(100000):
+#optimizer = optim.SGD(model.parameters())
+optimizer = None
+optimizer = optim.Rprop(model.parameters())
+
+for t in range(max_iterations):
     # Forward pass: compute predicted y by passing x to the model. Module objects
     # override the __call__ operator so you can call them like functions. When
     # doing so you pass a Variable of input data to the Module and it produces
@@ -69,24 +85,49 @@ for t in range(100000):
 
     # Zero the gradients before running the backward pass.
     model.zero_grad()
+    if optimizer:
+        optimizer.zero_grad()
 
     # Backward pass: compute gradient of the loss with respect to all the learnable
     # parameters of the model. Internally, the parameters of each Module are stored
     # in Variables with requires_grad=True, so this call will compute gradients for
     # all learnable parameters in the model.
     loss.backward()
+    if optimizer:
+        optimizer.step()
 
     # Update the weights using gradient descent. Each parameter is a Variable, so
     # we can access its data and gradients like we did before.
     for param in model.parameters():
         param.data -= learning_rate * param.grad.data
 
-y2s = model(x)
-i = 0
-for y2 in y2s:
-    print(int(y2[0]), f1(*(xs[i])))
-    i += 1
+if not math.isnan(loss) and not math.isinf(loss):
+    i = 0
+    xs = []
+    for i in range(0, 300, 20):
+        for i2 in range(0, 300, 20):
+            ax = [float(i), float(i2)]
+            xs.append(ax)
+            
+    xv = Variable(torch.FloatTensor(xs))
+    y2s = model(xv)
 
-if 1:
-    for param in model.parameters():
-        print(param.data)
+    loss = 0
+    
+    for i, x in enumerate(xs):
+        r = f1(*(x))
+        ay2 = y2s[i]
+        if math.isnan(ay2):
+            ay2 = 'NAN'
+        else:
+            ay2 = int(ay2)
+        inputstr = ''.join(['%6.0f' % xi for xi in x])
+        error = math.fabs(r - ay2)
+        print('%s %10.3f %10.3f %10.3f' % (inputstr, r, ay2, error))
+        loss += error ** 2
+    
+    print('MSE: %6.3f' % math.sqrt(loss))
+    
+    if 1:
+        for param in model.parameters():
+            print(param.data)

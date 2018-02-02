@@ -121,7 +121,7 @@ class Command(BaseCommand):
 
     def start_new_cycle(self, cycle):
         cycle += 1
-        cycle_window = 5
+        cycle_window = 10
         if cycle % cycle_window == 0:
             if cycle > 0:
                 self.t1 = time.time()
@@ -180,6 +180,57 @@ class Command(BaseCommand):
                     actorid=abot.pk,
                     angle=random())
 
+    def simulate_old(self, worldid):
+        import uvloop
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+        self.bins = {}
+
+        if worldid == 'any':
+            worldid = scall(self.api.first(module='world'))['id']
+        print('World %s' % worldid)
+
+        limit = self.options.get('cycles')
+
+        cycle = -1
+
+        self.bots = {}
+
+        t0 = time.time()
+        
+        bots_found = False
+        
+        while True:
+            cycle = self.start_new_cycle(cycle)
+
+            if limit is not None and cycle >= limit:
+                break
+
+            pr('Cycle: %s' % cycle)
+            
+            if 1 or not bots_found:
+                #print('HERE')
+                botids = sorted(
+                    [t['id'] for t in scall(self.api.find(module='bot', rootid=worldid))])
+
+            if not botids:
+                break
+
+            # TODO: remove dead bots from <bots>
+            bots_found = self.run_cycle(botids)
+            
+            # world.end_cycle()
+            # time.sleep(0.1)
+
+        t1 = time.time()
+        
+        for speed in sorted(self.bins.keys()):
+            print('%s, %s' % (speed, self.bins[speed]))
+
+        print('%s reqs./s.' % int(limit / (t1 - t0) * 11))
+
+        if self.options.get('stop'):
+            self.api.stop()
+        
     def simulate(self, worldid):
         import uvloop
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -197,24 +248,39 @@ class Command(BaseCommand):
 
         t0 = time.time()
         
-        while True:
-            cycle = self.start_new_cycle(cycle)
+        bots_found = False
+        
+        botids = sorted(
+            [t['id'] for t in scall(self.api.find(module='bot', rootid=worldid))])
 
-            if limit is not None and cycle >= limit:
-                break
-
-            pr('Cycle: %s' % cycle)
-            botids = sorted(
-                [t['id'] for t in scall(self.api.find(module='bot', rootid=worldid))])
-
-            if not botids:
-                break
-
-            # TODO: remove dead bots from <bots>
-            self.run_cycle(botids)
+        min_cycle = 0
+        bots_cycle = {bid: 0 for bid in botids}
+        
+        async def run_bot(botid, max_cycles=0):
+            nonlocal min_cycle, bots_cycle
+            from unscbot.models import Bot
+            bot = Bot(botid)
+            for i in range(max_cycles):
+                bots_cycle[botid] = i
+                await asyncio.sleep(0)
+                await bot.select_and_call_action()
+                
+                if min(bots_cycle.values()) > min_cycle:
+                    min_cycle = min(bots_cycle.values())
+                    #print(bots_cycle.values())
+                    #print(min_cycle)
+                    self.start_new_cycle(min_cycle)
             
-            # world.end_cycle()
-            # time.sleep(0.1)
+        self.start_new_cycle(-1)
+
+        futures = [
+            run_bot(t['id'], limit) 
+            for t 
+            in scall(self.api.find(module='bot', rootid=worldid))
+        ]
+        
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.gather(*futures))
 
         t1 = time.time()
         
@@ -227,6 +293,7 @@ class Command(BaseCommand):
             self.api.stop()
         
     def run_cycle(self, botids):
+        ret = True
         futures = []
         
         from unscbot.models import Bot
@@ -243,15 +310,8 @@ class Command(BaseCommand):
         loop = asyncio.get_event_loop()
         #loop.set_default_executor(ThreadPoolExecutor(1000))
         loop.run_until_complete(asyncio.gather(*futures))
-
-    def run_cycle_old(self, botids):
-        from unscbot.models import Bot
-        for botid in botids:
-            bot = self.bots.get(botid, None)
-            if bot is None:
-                self.bots[botid] = bot = Bot(botid, self.api)
-                bot.initialise()
-            bot.select_and_call_action()
+        
+        return ret
         
     def conn(self):
         t0 = time.time()
