@@ -1,3 +1,6 @@
+from django.http.request import HttpRequest
+import aiohttp
+from django.http.response import FileResponse
 try:
     basestring
 except NameError:
@@ -22,6 +25,56 @@ class UnscriptedStopRequest(Exception):
 
 buffer = ''
 
+# todo: move to another, more generic, utils.py
+def get_django_request_from_aiohttp_request(arequest):
+    request = HttpRequest()
+    '''
+    <CIMultiDict('Host': 'localhost:8000', 
+    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0', 
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 
+    'Accept-Language': 'en-GB,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 
+    'Cookie': 'csrftoken=z5nx2gwMuOLdzOG9vEoJG6MbHT73bUHK', 'DNT': '1', 
+    'Connection': 'keep-alive', 'Upgrade-Insecure-Requests': '1', 
+    'Cache-Control': 'max-age=0')>
+    '''
+    request.META = {
+        'REMOTE_ADDR': arequest.remote,
+        'HTTP_HOST': arequest.headers['Host'],
+        
+    }
+    request.content_type = arequest.content_type 
+    request.GET.update(**arequest.GET)
+    request.path = arequest.path
+    request.method = arequest.method
+    
+    return request
+
+def get_aiohttp_response_from_django_response(aresponse):
+    from aiohttp import web
+    '''
+    def __init__(self, *, body=None, status=200,
+                 reason=None, text=None, headers=None, 
+                 content_type=None, charset=None):
+    '''
+    
+    print(repr(aresponse._headers))
+    
+    if isinstance(aresponse, FileResponse):
+        print(aresponse.streaming_content.__class__.__module__)
+        ret = web.FileResponse(
+            path=aresponse.streaming_content,
+            headers={p[0]: p[1] for p in aresponse._headers.values()},
+            status=aresponse.status_code,
+        )
+    else:
+        ret = web.Response(
+            body=aresponse.content,
+            headers={p[0]: p[1] for p in aresponse._headers.values()},
+            status=aresponse.status_code,
+        )
+    
+    return ret
+
 def pr(message):
     global buffer
     import asyncio
@@ -34,6 +87,7 @@ def pr(message):
     #print('%s %s %s' % (tid, taskid, message))
 
 def scall(coro):
+    '''Synchronously call an async function'''
     import asyncio
     return asyncio.get_event_loop().run_until_complete(coro)
     

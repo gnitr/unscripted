@@ -1,3 +1,129 @@
+reinstate the http service
+    http api
+        need to capture routes starting with api
+    vis web page
+
+<class 'aiohttp.web_request.Request'>
+['GET'
+'POST_METHODS'
+'_MutableMapping__marker'
+'__abstractmethods__'
+'__class__'
+'__contains__'
+'__delattr__'
+'__delitem__'
+'__dict__'
+'__dir__'
+'__doc__'
+'__eq__'
+'__format__'
+'__ge__'
+'__getattribute__'
+'__getitem__'
+'__gt__'
+'__hash__'
+'__init__'
+'__init_subclass__'
+'__iter__'
+'__le__'
+'__len__'
+'__lt__'
+'__module__'
+'__ne__'
+'__new__'
+'__reduce__'
+'__reduce_ex__'
+'__repr__'
+'__reversed__'
+'__setattr__'
+'__setitem__'
+'__sizeof__'
+'__slots__'
+'__str__'
+'__subclasshook__'
+'__weakref__'
+'_abc_cache'
+'_abc_negative_cache'
+'_abc_negative_cache_version'
+'_abc_registry'
+'_cache'
+'_client_max_size'
+'_content_dict'
+'_content_type'
+'_headers'
+'_host'
+'_loop'
+'_match_info'
+'_message'
+'_method'
+'_parse_content_type'
+'_payload'
+'_post'
+'_prepare_hook'
+'_protocol'
+'_read_bytes'
+'_rel_url'
+'_remote'
+'_scheme'
+'_state'
+'_stored_content_type'
+'_task'
+'_transport'
+'_version'
+'_writer'
+'app'
+'body_exists'
+'can_read_body'
+'charset'
+'clear'
+'clone'
+'content'
+'content_length'
+'content_type'
+'cookies'
+'forwarded'
+'get'
+'has_body'
+'headers'
+'host'
+'http_range'
+'if_modified_since'
+'items'
+'json'
+'keep_alive'
+'keys'
+'loop'
+'match_info'
+'message'
+'method'
+'multipart'
+'path'
+'path_qs'
+'pop'
+'popitem'
+'post'
+'protocol'
+'query'
+'query_string'
+'raw_headers'
+'raw_path'
+'read'
+'rel_url'
+'release'
+'remote'
+'scheme'
+'secure'
+'setdefault'
+'task'
+'text'
+'transport'
+'update'
+'url'
+'values'
+'version'
+'writer']
+
+
 pm ucore runserver
 pm utest 5a236bf5274d0a150d66ee5f simulate --cycles=100
 
@@ -260,4 +386,15 @@ class Thing
     actionX
     _actionY
     
+    
+    
+* python manage.py migrate
+* run the web server: python manage.py ucore runserver
+* create a new virtual world with your browser: http://localhost:8000/api/1/worlds?method=POST
+* copy the id of the newly created world from the json response (MYWORLDID)
+* populate the world with bots: python manage.py utest MYWORLDID repop_well
+* visualise the word in your browser: http://localhost:8000/vis/worlds/MYWORLDID/
+* run a simulation: python manage.py utest MYWORLDID simulate
+* visualise the word in your browser: http://localhost:8000/vis/worlds/MYWORLDID/
+
     

@@ -18,7 +18,12 @@ class WSRequest(HttpRequest):
         self.reset( *args, **kwargs)
         
     def reset(self, message=None, api_root=''):
+        '''
+        api_root = 'ws://127.0.0.1:8000/api/'
+        message = 'things'
+        '''
         if message:
+            
             parts = message.split('?')
             self.api_path = parts.pop(0)
             self.path = self.api_path
@@ -104,34 +109,53 @@ class UnscriptedAPI(object):
         
             return ws
         
-        app = web.Application()
-        app.router.add_get('/', websocket_handler)
-        web.run_app(app, host=hostname, port=int(port))
-
-    def listen_to_websocket1(self, hostname='127.0.0.1', port=8000):
-        import websockets
-        
-        if hostname == '0':
-            hostname = '0.0.0.0'
+        def vis_handler(arequest):
+            worldid = arequest.match_info.get('worldid', '100')
             
-        request = WSRequest()
+            from unscvis.views import view_worlds
+            
+            request = dbutils.get_django_request_from_aiohttp_request(arequest)
+            res = view_worlds(request, worldid)
+            response = dbutils.get_aiohttp_response_from_django_response(res)
+            return response
         
-        # TODO: check path = api/1
-        async def hello(socket, path):
-            try: 
-                while True:
-                    message = await socket.recv()
-                    #print(message)
-                    res = await self.process_socket_message(message, request)
-                    #print(res)
-                    await socket.send(json.dumps(res))
-            except ConnectionClosed:
-                print('Connection closed')
-
-        start_server = websockets.serve(hello, hostname, port)
+        def django_static_handler(arequest):
+            path = arequest.match_info.get('path')
+            from django.contrib.staticfiles import finders
+            file_path = finders.find(path)
+            ret = web.FileResponse(path=file_path)
+            
+            return ret
         
-        asyncio.get_event_loop().run_until_complete(start_server)
-        asyncio.get_event_loop().run_forever()
+        async def api_handler_http(arequest):
+            if arequest.headers.get('Upgrade', '').lower() == 'websocket':
+                # ws:
+                return await websocket_handler(arequest)
+            else:
+                # http:
+                # http is blocking, we could create a clever loop outside 
+                # aiohttp's loop or something like that where all requests
+                # http or ws are handled in the same way. It's just easier
+                # for the moment to respond immediatelly.
+                # To do that we need to make a synchronous call
+                path = arequest.match_info.get('path')
+                #res = dbutils.scall(self.process(dbutils.get_django_request_from_aiohttp_request(arequest), path))
+                res = await self.process(dbutils.get_django_request_from_aiohttp_request(arequest), path)
+                ret = web.Response(body=json.dumps(res), content_type='application/json')
+                return ret
+            
+        
+        app = web.Application()
+        from django.conf import settings
+        import re
+        api_root = re.sub(r'.*?://[^/]+', '', settings.UNSCRIPTED_REMOTE_API).strip('/')
+        
+        # note: ws will request /api/1/ then send the path as a message!
+        app.router.add_get('/' + api_root+'{path:$|/.*}', api_handler_http)
+        app.router.add_get('/static/{path:.+}', django_static_handler)
+        # todo: read and convert routes from urls.py
+        app.router.add_get('/worlds/{worldid}', vis_handler)
+        web.run_app(app, host=hostname, port=int(port))
 
     def get_status(self, response):
         ret = 200
@@ -142,7 +166,8 @@ class UnscriptedAPI(object):
     async def process_socket_message(self, message, request):
         # e.g. message = 'worlds/X/things?module=bot&@method=GET'
         #request = WSRequest(message)
-        request.reset(message)
+        from django.conf import settings
+        request.reset(message, settings.UNSCRIPTED_REMOTE_API)
         return await self.process(request, request.get_api_path())
 
     async def process(self, request, path):

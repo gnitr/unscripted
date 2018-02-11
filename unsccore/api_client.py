@@ -67,6 +67,7 @@ class Urllib3Session(object):
         
         return ret
 
+# PyCurl is faster than requests
 class PyCurlSession(object):
 
     def __init__(self, api_root):
@@ -145,15 +146,6 @@ class API_Client(object):
     
         self.api_root = api_root
         
-        if 0:
-            if self.api_root.startswith('ws'): 
-                self.session = WSSession(self.api_root)
-            else:
-                # PyCurl is faster than requests
-                #self.session = PyCurlSession()
-                self.session = AiohttpSession()
-                #self.session = Urllib3Session()
-                #self.session = requests.Session()
         request_backend = settings.UNSCRIPTED_REQUEST_BACKEND
         print('UNSCRIPTED REQUEST BACKEND = %s' % request_backend)
         self.session = globals()[request_backend](api_root)
@@ -204,6 +196,7 @@ class API_Client(object):
 
         res = None
         try:
+            print(url)
             res = await self.session.get(url)
         except requests.exceptions.ConnectionError as e:
             # fails silently
