@@ -65,7 +65,7 @@ That's 10mx10m world with 10 bots and 2 wells.
 
 This stage is necessary as I realised that the engine on the server-side is extremely slow. We want the bots to live many times faster than in real time otherwise it will take years to see an emerence of adaptation. Read the discussion about [the speed of virtual life in the Wiki](https://github.com/gnitr/unscripted/wiki/The-Speed-of-Life-&-Learning).
 
-## 0.4: Update the visualisation (Starting Feb 2018)
+## 0.4: Update the visualisation (completed Feb 2018)
 * repair the web based visualisation of the world so it works with websocket server instead of the http server
 
 ## 0.5: Adaptive Mind (starting Feb/March 2017)
