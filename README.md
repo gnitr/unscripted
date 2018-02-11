@@ -14,7 +14,7 @@
   * bold, unrealistic, naive and playful approach rather than cautious, formal, all-knowing and critical
   * wider reflexion about artificial and human life rather than a purely technical project
 * **This is NOT**: it's NOT a chat bot! Think P-NPC (a playing non-playing-character). A world where NPCs are the heros.
-* **Status**: Phase 2 is complete. Phase 3 planned for November 2017 (see 'roadmap' section below)
+* **Status**: Version 0.4 is complete. Next phase planned for March 2018 (see 'roadmap' section below)
 * **Demo**: Demo video will come once I see a form of adaptation emerging
 
 Copyright (c) 2017 Artilligence Ltd, UK
