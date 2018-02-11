@@ -68,7 +68,7 @@ This stage is necessary as I realised that the engine on the server-side is extr
 ## 0.4: Update the visualisation (completed Feb 2018)
 * repair the web based visualisation of the world so it works with websocket server instead of the http server
 
-## 0.5: Adaptive Mind (starting Feb/March 2017)
+## 0.5: Adaptive Mind (starting Feb/March 2018)
 
 * create a very basic but working model of a bot mind, possibly neural net
 * introduce a basic mechanism for allowing adaptation
